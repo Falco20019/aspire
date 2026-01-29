@@ -82,6 +82,12 @@ public sealed class TypeScriptPolyglotTests(ITestOutputHelper output)
         // Enable polyglot support feature flag
         sequenceBuilder.EnablePolyglotSupport(counter);
 
+        // DEBUG: Show global settings file after enabling polyglot
+        sequenceBuilder
+            .Type("echo '=== GLOBAL SETTINGS ===' && cat ~/.aspire/globalsettings.json 2>/dev/null || echo 'File not found'")
+            .Enter()
+            .WaitForSuccessPrompt(counter);
+
         // Step 1: Create TypeScript AppHost using aspire init with interactive language selection
         sequenceBuilder
             .Type("aspire init")
@@ -92,6 +98,24 @@ public sealed class TypeScriptPolyglotTests(ITestOutputHelper output)
             .WaitUntil(s => waitingForTypeScriptSelected.Search(s).Count > 0, TimeSpan.FromSeconds(5))
             .Enter() // select TypeScript
             .WaitUntil(s => waitingForAppHostCreated.Search(s).Count > 0, TimeSpan.FromMinutes(2))
+            .WaitForSuccessPrompt(counter);
+
+        // DEBUG: Show local settings file after aspire init
+        sequenceBuilder
+            .Type("echo '=== LOCAL SETTINGS ===' && cat .aspire/settings.json 2>/dev/null || echo 'File not found'")
+            .Enter()
+            .WaitForSuccessPrompt(counter);
+
+        // DEBUG: Show aspire config list to see merged config
+        sequenceBuilder
+            .Type("echo '=== ASPIRE CONFIG LIST ===' && aspire config list")
+            .Enter()
+            .WaitForSuccessPrompt(counter);
+
+        // DEBUG: List files in directory to confirm apphost.ts exists
+        sequenceBuilder
+            .Type("echo '=== DIRECTORY LISTING ===' && ls -la && ls -la .aspire/")
+            .Enter()
             .WaitForSuccessPrompt(counter);
 
         // Step 2: Create a Vite app using npm create vite
