@@ -200,6 +200,9 @@ parse_args() {
 # PLATFORM DETECTION
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# Supported RIDs for the bundle
+readonly SUPPORTED_RIDS="linux-x64 linux-arm64 osx-x64 osx-arm64"
+
 detect_os() {
     if [[ -n "$OS" ]]; then
         say_verbose "Using specified OS: $OS"
@@ -253,6 +256,24 @@ detect_arch() {
 
 get_platform_rid() {
     echo "${OS}-${ARCH}"
+}
+
+validate_rid() {
+    local rid="$1"
+    
+    # Check if the RID is in the supported list
+    if ! echo "$SUPPORTED_RIDS" | grep -qw "$rid"; then
+        say_error "Unsupported platform: $rid"
+        say_info ""
+        say_info "The Aspire Bundle is currently available for:"
+        for supported_rid in $SUPPORTED_RIDS; do
+            say_info "  • $supported_rid"
+        done
+        say_info ""
+        say_info "If you need support for $rid, please open an issue at:"
+        say_info "  https://github.com/${GITHUB_REPO}/issues"
+        exit 1
+    fi
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -497,6 +518,9 @@ main() {
     detect_os
     detect_arch
     
+    # Validate the RID is supported
+    validate_rid "$(get_platform_rid)"
+    
     # Set defaults
     if [[ -z "$INSTALL_PATH" ]]; then
         INSTALL_PATH="${ASPIRE_INSTALL_PATH:-$HOME/.aspire}"
@@ -511,6 +535,13 @@ main() {
     
     # Expand ~ in install path
     INSTALL_PATH="${INSTALL_PATH/#\~/$HOME}"
+    
+    # Validate install path contains only safe characters to prevent shell injection
+    if [[ ! "$INSTALL_PATH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
+        say_error "Install path contains invalid characters: $INSTALL_PATH"
+        say_info "Path must contain only alphanumeric characters, /, _, ., and -"
+        exit 1
+    fi
     
     say_info "Version:      ${VERSION}"
     say_info "Platform:     $(get_platform_rid)"

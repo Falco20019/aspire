@@ -933,6 +933,18 @@ internal sealed class DashboardEventHandlers(IConfiguration configuration,
         {
             return false;
         }
+
+        // On Unix, verify the file is executable
+        if (!OperatingSystem.IsWindows())
+        {
+            var fileInfo = new FileInfo(path);
+            // Check if file has any execute permission (owner, group, or other)
+            var mode = fileInfo.UnixFileMode;
+            if ((mode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) == 0)
+            {
+                return false;
+            }
+        }
         
         // Check if there's a corresponding DLL
         var directory = Path.GetDirectoryName(path)!;

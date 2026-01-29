@@ -200,15 +200,29 @@ internal sealed class BundleDownloader : IBundleDownloader
         {
             await _interactionService.ShowStatusAsync($"Downloading Aspire Bundle v{version}...", async () =>
             {
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(TimeSpan.FromSeconds(DownloadTimeoutSeconds));
+                const int maxRetries = 3;
+                for (var attempt = 1; attempt <= maxRetries; attempt++)
+                {
+                    try
+                    {
+                        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                        cts.CancelAfter(TimeSpan.FromSeconds(DownloadTimeoutSeconds));
 
-                using var response = await s_httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-                response.EnsureSuccessStatusCode();
+                        using var response = await s_httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                        response.EnsureSuccessStatusCode();
 
-                await using var contentStream = await response.Content.ReadAsStreamAsync(cts.Token);
-                await using var fileStream = new FileStream(archivePath, FileMode.Create, FileAccess.Write, FileShare.None);
-                await contentStream.CopyToAsync(fileStream, cts.Token);
+                        await using var contentStream = await response.Content.ReadAsStreamAsync(cts.Token);
+                        await using var fileStream = new FileStream(archivePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                        await contentStream.CopyToAsync(fileStream, cts.Token);
+
+                        return 0;
+                    }
+                    catch (HttpRequestException) when (attempt < maxRetries)
+                    {
+                        _logger.LogDebug("Download attempt {Attempt} failed, retrying...", attempt);
+                        await Task.Delay(TimeSpan.FromSeconds(attempt * 2), cancellationToken);
+                    }
+                }
 
                 return 0;
             });

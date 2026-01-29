@@ -25,12 +25,18 @@ internal static class RuntimeIdentifierHelper
 
 /// <summary>
 /// Utilities for running processes using the layout's .NET runtime.
-/// Bundle tools are all native executables.
+/// Supports both native executables and framework-dependent DLLs.
 /// </summary>
 internal static class LayoutProcessRunner
 {
     /// <summary>
-    /// Runs a tool executable and captures output.
+    /// Determines if a path refers to a DLL that needs dotnet to run.
+    /// </summary>
+    private static bool IsDll(string path) => path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Runs a tool and captures output. Automatically detects if the tool
+    /// is a DLL (needs muxer) or native executable (runs directly).
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunAsync(
         LayoutConfiguration layout,
@@ -41,7 +47,7 @@ internal static class LayoutProcessRunner
         CancellationToken ct = default)
     {
         using var process = CreateProcess(layout, toolPath, arguments, workingDirectory, environmentVariables, redirectOutput: true);
-        
+
         process.Start();
 
         var outputTask = process.StandardOutput.ReadToEndAsync(ct);
@@ -70,7 +76,8 @@ internal static class LayoutProcessRunner
     }
 
     /// <summary>
-    /// Creates a configured Process for running a bundle tool executable.
+    /// Creates a configured Process for running a bundle tool.
+    /// For DLLs, uses the layout's muxer (dotnet). For executables, runs directly.
     /// </summary>
     private static Process CreateProcess(
         LayoutConfiguration layout,
@@ -80,11 +87,25 @@ internal static class LayoutProcessRunner
         IDictionary<string, string>? environmentVariables,
         bool redirectOutput)
     {
+        var isDll = IsDll(toolPath);
         var process = new Process();
 
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
-        process.StartInfo.FileName = toolPath;
+
+        if (isDll)
+        {
+            // DLLs need the muxer to run
+            var muxerPath = layout.GetMuxerPath()
+                ?? throw new InvalidOperationException("Layout muxer not found. Cannot run framework-dependent tool.");
+            process.StartInfo.FileName = muxerPath;
+            process.StartInfo.ArgumentList.Add(toolPath);
+        }
+        else
+        {
+            // Native executables run directly
+            process.StartInfo.FileName = toolPath;
+        }
 
         if (redirectOutput)
         {

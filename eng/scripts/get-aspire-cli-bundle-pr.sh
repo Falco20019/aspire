@@ -687,6 +687,14 @@ else
     INSTALL_PREFIX_UNEXPANDED="$INSTALL_PREFIX"
 fi
 
+# Validate install prefix contains only safe characters to prevent shell injection
+# when writing to shell profile
+if [[ ! "$INSTALL_PREFIX" =~ ^[a-zA-Z0-9/_.-]+$ ]] && [[ ! "$INSTALL_PREFIX" =~ ^\$HOME ]]; then
+    say_error "Install prefix contains invalid characters: $INSTALL_PREFIX"
+    say_info "Path must contain only alphanumeric characters, /, _, ., and -"
+    exit 1
+fi
+
 # Create temporary directory
 if [[ "$DRY_RUN" == true ]]; then
     temp_dir="/tmp/aspire-bundle-pr-dry-run"

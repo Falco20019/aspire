@@ -41,9 +41,11 @@ internal class PackagingService(CliExecutionContext executionContext, INuGetPack
             var prHives = executionContext.HivesDirectory.GetDirectories();
             foreach (var prHive in prHives)
             {
+                // The packages subdirectory contains the actual .nupkg files
+                var packagesPath = Path.Combine(prHive.FullName, "packages");
                 var prChannel = PackageChannel.CreateExplicitChannel(prHive.Name, PackageChannelQuality.Prerelease, new[]
                 {
-                    new PackageMapping("Aspire*", prHive.FullName),
+                    new PackageMapping("Aspire*", packagesPath),
                     new PackageMapping(PackageMapping.AllPackages, "https://api.nuget.org/v3/index.json")
                 }, nuGetPackageCache);
 

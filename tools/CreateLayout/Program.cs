@@ -13,6 +13,9 @@ namespace Aspire.Tools.CreateLayout;
 /// Creates the Aspire bundle layout for distribution.
 /// This tool assembles all components into a self-contained package.
 /// </summary>
+/// <remarks>
+/// See docs/specs/bundle.md for the complete bundle specification and layout structure.
+/// </remarks>
 public static class Program
 {
     public static async Task<int> Main(string[] args)
