@@ -32,9 +32,6 @@ public enum LayoutComponent
 /// </summary>
 public sealed class LayoutConfiguration
 {
-    private string? _cachedMuxerPath;
-    private bool _muxerPathCached;
-
     /// <summary>
     /// Bundle version (e.g., "13.2.0" or "dev" for local development).
     /// </summary>
@@ -91,91 +88,18 @@ public sealed class LayoutConfiguration
     }
 
     /// <summary>
-    /// Gets the path to the dotnet muxer executable.
-    /// Set ASPIRE_ALLOW_GLOBAL_DOTNET=true to enable fallback to global dotnet in bundle mode.
+    /// Gets the path to the dotnet muxer executable from the bundled runtime.
     /// </summary>
     public string? GetMuxerPath()
     {
-        if (_muxerPathCached)
-        {
-            return _cachedMuxerPath;
-        }
-
-        _cachedMuxerPath = ResolveMuxerPath();
-        _muxerPathCached = true;
-        return _cachedMuxerPath;
-    }
-
-    private string? ResolveMuxerPath()
-    {
         var runtimePath = GetComponentPath(LayoutComponent.Runtime);
-        if (runtimePath is not null)
+        if (runtimePath is null)
         {
-            var bundledPath = Path.Combine(runtimePath, BundleDiscovery.GetDotNetExecutableName());
-            if (File.Exists(bundledPath))
-            {
-                return bundledPath;
-            }
+            return null;
         }
 
-        // In bundle mode, only fall back to global dotnet if explicitly allowed
-        var allowGlobal = Environment.GetEnvironmentVariable("ASPIRE_ALLOW_GLOBAL_DOTNET");
-        if (string.Equals(allowGlobal, "true", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(allowGlobal, "1", StringComparison.OrdinalIgnoreCase))
-        {
-            return FindGlobalDotNet();
-        }
-
-        // Bundle mode with no bundled runtime and fallback disabled
-        return null;
-    }
-
-    /// <summary>
-    /// Finds the global dotnet executable on the system PATH.
-    /// </summary>
-    private static string? FindGlobalDotNet()
-    {
-        var dotnetName = BundleDiscovery.GetDotNetExecutableName();
-
-        // Check DOTNET_ROOT first
-        var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
-        if (!string.IsNullOrEmpty(dotnetRoot))
-        {
-            var dotnetPath = Path.Combine(dotnetRoot, dotnetName);
-            if (File.Exists(dotnetPath))
-            {
-                return dotnetPath;
-            }
-        }
-
-        // Check PATH
-        var pathEnv = Environment.GetEnvironmentVariable("PATH");
-        if (pathEnv is not null)
-        {
-            var separator = OperatingSystem.IsWindows() ? ';' : ':';
-            foreach (var dir in pathEnv.Split(separator, StringSplitOptions.RemoveEmptyEntries))
-            {
-                var dotnetPath = Path.Combine(dir, dotnetName);
-                if (File.Exists(dotnetPath))
-                {
-                    return dotnetPath;
-                }
-            }
-        }
-
-        // On Windows, check default install location
-        if (OperatingSystem.IsWindows())
-        {
-            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-            var defaultPath = Path.Combine(programFiles, "dotnet", dotnetName);
-            if (File.Exists(defaultPath))
-            {
-                return defaultPath;
-            }
-        }
-
-        // Just return "dotnet" and let the OS resolve it
-        return dotnetName;
+        var bundledPath = Path.Combine(runtimePath, BundleDiscovery.GetDotNetExecutableName());
+        return File.Exists(bundledPath) ? bundledPath : null;
     }
 
     /// <summary>
