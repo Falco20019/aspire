@@ -196,7 +196,7 @@ public sealed class LayoutConfiguration
     /// <summary>
     /// Gets the path to the AppHost Server executable.
     /// </summary>
-    /// <returns>The path to aspire-server executable.</returns>
+    /// <returns>The path to aspire-server.exe.</returns>
     public string? GetAppHostServerPath()
     {
         var serverPath = GetComponentPath(LayoutComponent.AppHostServer);
@@ -211,7 +211,7 @@ public sealed class LayoutConfiguration
     /// <summary>
     /// Gets the path to the NuGet Helper executable.
     /// </summary>
-    /// <returns>The path to aspire-nuget executable.</returns>
+    /// <returns>The path to aspire-nuget.exe.</returns>
     public string? GetNuGetHelperPath()
     {
         var helperPath = GetComponentPath(LayoutComponent.NuGetHelper);
@@ -224,12 +224,12 @@ public sealed class LayoutConfiguration
     }
 
     /// <summary>
-    /// Gets the path to the dev-certs executable.
+    /// Gets the path to the dev-certs DLL (requires dotnet muxer to run).
     /// </summary>
     public string? GetDevCertsPath()
     {
         var devCertsPath = GetComponentPath(LayoutComponent.DevCerts);
-        return devCertsPath is not null ? Path.Combine(devCertsPath, BundleDiscovery.GetExecutableFileName(BundleDiscovery.DevCertsExecutableName)) : null;
+        return devCertsPath is not null ? Path.Combine(devCertsPath, BundleDiscovery.GetDllFileName(BundleDiscovery.DevCertsExecutableName)) : null;
     }
 }
 

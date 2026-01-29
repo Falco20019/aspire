@@ -147,15 +147,16 @@ internal class ConfigureDefaultDcpOptions(
         var dcpPublisherConfiguration = configuration.GetSection(DcpPublisher);
         var assemblyMetadata = appOptions.Assembly?.GetCustomAttributes<AssemblyMetadataAttribute>();
 
-        // Priority 1: Check environment variables first (for Aspire CLI bundle mode)
-        var envDcpPath = Environment.GetEnvironmentVariable(BundleDiscovery.DcpPathEnvVar);
-        var envDashboardPath = Environment.GetEnvironmentVariable(BundleDiscovery.DashboardPathEnvVar);
+        // Priority 1: Check configuration first (env vars are automatically bound via IConfiguration)
+        // BundleDiscovery env vars: ASPIRE_DCP_PATH, ASPIRE_DASHBOARD_PATH
+        var configDcpPath = configuration[BundleDiscovery.DcpPathEnvVar];
+        var configDashboardPath = configuration[BundleDiscovery.DashboardPathEnvVar];
 
-        if (!string.IsNullOrEmpty(envDcpPath))
+        if (!string.IsNullOrEmpty(configDcpPath))
         {
-            // Environment variable override - set DCP paths from bundle
-            options.CliPath = BundleDiscovery.GetDcpExecutablePath(envDcpPath);
-            options.ExtensionsPath = Path.Combine(envDcpPath, "ext");
+            // Configuration/environment variable override - set DCP paths from bundle
+            options.CliPath = BundleDiscovery.GetDcpExecutablePath(configDcpPath);
+            options.ExtensionsPath = Path.Combine(configDcpPath, "ext");
         }
         else if (!string.IsNullOrEmpty(dcpPublisherConfiguration[nameof(options.CliPath)]))
         {
@@ -179,10 +180,10 @@ internal class ConfigureDefaultDcpOptions(
             options.ExtensionsPath = GetMetadataValue(assemblyMetadata, DcpExtensionsPathMetadataKey);
         }
 
-        if (!string.IsNullOrEmpty(envDashboardPath))
+        if (!string.IsNullOrEmpty(configDashboardPath))
         {
-            // Environment variable override - set Dashboard path from bundle
-            options.DashboardPath = envDashboardPath;
+            // Configuration/environment variable override - set Dashboard path from bundle
+            options.DashboardPath = configDashboardPath;
         }
         else if (!string.IsNullOrEmpty(dcpPublisherConfiguration[nameof(options.DashboardPath)]))
         {

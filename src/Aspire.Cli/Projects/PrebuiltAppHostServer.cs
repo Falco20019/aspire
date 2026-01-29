@@ -132,31 +132,18 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
     }
 
     /// <summary>
-    /// Gets NuGet sources from environment variables and package channels.
+    /// Gets NuGet sources from package channels.
     /// This mirrors the channel resolution logic in DotNetBasedAppHostServerProject.
     /// </summary>
     private async Task<IEnumerable<string>?> GetNuGetSourcesAsync(CancellationToken cancellationToken)
     {
         var sources = new List<string>();
 
-        // First, add sources from environment variable (highest priority)
-        var sourcesEnv = Environment.GetEnvironmentVariable("ASPIRE_NUGET_SOURCE");
-        if (!string.IsNullOrWhiteSpace(sourcesEnv))
-        {
-            var envSources = sourcesEnv
-                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToList();
-            sources.AddRange(envSources);
-            _logger.LogDebug("Using environment NuGet sources: {Sources}", string.Join(", ", envSources));
-        }
-
-        // Then, add sources from package channels (same as SDK mode)
         try
         {
             var channels = await _packagingService.GetChannelsAsync(cancellationToken);
 
             // Look for explicit channels (staging, daily, PR hives)
-            // We prioritize explicit channels as they contain the Aspire packages we need
             foreach (var channel in channels.Where(c => c.Type == PackageChannelType.Explicit))
             {
                 if (channel.Mappings is null)
@@ -166,9 +153,7 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
 
                 foreach (var mapping in channel.Mappings)
                 {
-                    // Only add Aspire package sources (not the fallback nuget.org)
-                    if (mapping.PackageFilter.StartsWith("Aspire", StringComparison.OrdinalIgnoreCase) &&
-                        !sources.Contains(mapping.Source, StringComparer.OrdinalIgnoreCase))
+                    if (!sources.Contains(mapping.Source, StringComparer.OrdinalIgnoreCase))
                     {
                         sources.Add(mapping.Source);
                         _logger.LogDebug("Using channel '{Channel}' NuGet source: {Source}", channel.Name, mapping.Source);
@@ -192,53 +177,25 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
         bool debug = false)
     {
         var serverPath = GetServerPath();
-        var isExe = OperatingSystem.IsWindows()
-            ? serverPath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-            : !serverPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
 
-        // Get runtime path early - needed for both exe and dll cases
+        // Get runtime path for DOTNET_ROOT
         var runtimePath = _layout.GetDotNetExePath();
         var runtimeDir = runtimePath is not null ? Path.GetDirectoryName(runtimePath) : null;
 
-        ProcessStartInfo startInfo;
-
-        if (isExe)
+        // Bundle always uses single-file executables - run directly
+        var startInfo = new ProcessStartInfo(serverPath)
         {
-            // For single-file exe (Windows .exe or Unix extensionless), run directly
-            startInfo = new ProcessStartInfo(serverPath)
-            {
-                WorkingDirectory = _workingDirectory,
-                WindowStyle = ProcessWindowStyle.Minimized,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+            WorkingDirectory = _workingDirectory,
+            WindowStyle = ProcessWindowStyle.Minimized,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
 
-            // CRITICAL: Set DOTNET_ROOT before starting so the single-file exe can find the runtime
-            if (runtimeDir is not null)
-            {
-                startInfo.Environment["DOTNET_ROOT"] = runtimeDir;
-                startInfo.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
-            }
-        }
-        else
+        // Set DOTNET_ROOT so the executable can find the runtime
+        if (runtimeDir is not null)
         {
-            // For DLL, use dotnet exec
-            var dotnetPath = runtimePath;
-            if (dotnetPath is null || !File.Exists(dotnetPath))
-            {
-                throw new InvalidOperationException("Bundle runtime not found.");
-            }
-
-            startInfo = new ProcessStartInfo(dotnetPath)
-            {
-                WorkingDirectory = _workingDirectory,
-                WindowStyle = ProcessWindowStyle.Minimized,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            startInfo.ArgumentList.Add("exec");
-            startInfo.ArgumentList.Add(serverPath);
+            startInfo.Environment["DOTNET_ROOT"] = runtimeDir;
+            startInfo.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
         }
 
         // Add arguments to point to our appsettings.json
@@ -260,11 +217,9 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
         startInfo.Environment["REMOTE_APP_HOST_PID"] = hostPid.ToString(System.Globalization.CultureInfo.InvariantCulture);
         startInfo.Environment[KnownConfigNames.CliProcessId] = hostPid.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        // Ensure DOTNET_ROOT is set for DCP/Dashboard (may already be set for exe case above)
+        // Also set ASPIRE_RUNTIME_PATH so DashboardEventHandlers knows which dotnet to use
         if (runtimeDir is not null)
         {
-            startInfo.Environment["DOTNET_ROOT"] = runtimeDir;
-            // Also set ASPIRE_RUNTIME_PATH so DashboardEventHandlers knows which dotnet to use
             startInfo.Environment[BundleDiscovery.RuntimePathEnvVar] = runtimeDir;
         }
 
@@ -289,18 +244,9 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
         var dashboardPath = _layout.GetDashboardPath();
         if (dashboardPath is not null)
         {
-            // Check for single-file exe first (bundle distribution), then fall back to DLL
-            var dashboardExe = Path.Combine(dashboardPath, "aspire-dashboard.exe");
-            var dashboardDll = Path.Combine(dashboardPath, "aspire-dashboard.dll");
-            
-            if (File.Exists(dashboardExe))
-            {
-                startInfo.Environment[BundleDiscovery.DashboardPathEnvVar] = dashboardExe;
-            }
-            else
-            {
-                startInfo.Environment[BundleDiscovery.DashboardPathEnvVar] = dashboardDll;
-            }
+            // Bundle uses single-file executables
+            var dashboardExe = Path.Combine(dashboardPath, BundleDiscovery.GetExecutableFileName(BundleDiscovery.DashboardExecutableName));
+            startInfo.Environment[BundleDiscovery.DashboardPathEnvVar] = dashboardExe;
         }
 
         // Apply environment variables from apphost.run.json

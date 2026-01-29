@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Aspire.Cli.Certificates;
 
 /// <summary>
-/// Certificate tool runner that uses the bundled dev-certs tool with the bundled runtime.
+/// Certificate tool runner that uses the bundled dev-certs DLL with the bundled runtime.
 /// </summary>
 internal sealed class BundleCertificateToolRunner(
     LayoutConfiguration layout,
@@ -22,16 +22,16 @@ internal sealed class BundleCertificateToolRunner(
         CancellationToken cancellationToken)
     {
         var muxerPath = layout.GetMuxerPath();
-        var devCertsDll = layout.GetDevCertsPath();
+        var devCertsPath = layout.GetDevCertsPath();
 
         if (muxerPath is null)
         {
-            throw new InvalidOperationException("Bundle muxer path is not configured. The bundle may be corrupt.");
+            throw new InvalidOperationException("Bundle runtime not found. The bundle may be corrupt.");
         }
 
-        if (devCertsDll is null || !File.Exists(devCertsDll))
+        if (devCertsPath is null || !File.Exists(devCertsPath))
         {
-            throw new InvalidOperationException($"dev-certs.dll not found in bundle at expected location. The bundle may be corrupt or incomplete.");
+            throw new InvalidOperationException("dev-certs tool not found in bundle. The bundle may be corrupt or incomplete.");
         }
 
         var outputBuilder = new StringBuilder();
@@ -46,7 +46,7 @@ internal sealed class BundleCertificateToolRunner(
         };
 
         // Use ArgumentList to prevent command injection
-        startInfo.ArgumentList.Add(devCertsDll);
+        startInfo.ArgumentList.Add(devCertsPath);
         startInfo.ArgumentList.Add("https");
         startInfo.ArgumentList.Add("--check-trust-machine-readable");
 
@@ -131,16 +131,16 @@ internal sealed class BundleCertificateToolRunner(
         CancellationToken cancellationToken)
     {
         var muxerPath = layout.GetMuxerPath();
-        var devCertsDll = layout.GetDevCertsPath();
+        var devCertsPath = layout.GetDevCertsPath();
 
         if (muxerPath is null)
         {
-            throw new InvalidOperationException("Bundle muxer path is not configured. The bundle may be corrupt.");
+            throw new InvalidOperationException("Bundle runtime not found. The bundle may be corrupt.");
         }
 
-        if (devCertsDll is null || !File.Exists(devCertsDll))
+        if (devCertsPath is null || !File.Exists(devCertsPath))
         {
-            throw new InvalidOperationException($"dev-certs.dll not found in bundle at expected location. The bundle may be corrupt or incomplete.");
+            throw new InvalidOperationException("dev-certs tool not found in bundle. The bundle may be corrupt or incomplete.");
         }
 
         var startInfo = new ProcessStartInfo(muxerPath)
@@ -153,7 +153,7 @@ internal sealed class BundleCertificateToolRunner(
         };
 
         // Use ArgumentList to prevent command injection
-        startInfo.ArgumentList.Add(devCertsDll);
+        startInfo.ArgumentList.Add(devCertsPath);
         startInfo.ArgumentList.Add("https");
         startInfo.ArgumentList.Add("--trust");
 
@@ -184,4 +184,3 @@ internal sealed class BundleCertificateToolRunner(
         return process.ExitCode;
     }
 }
-

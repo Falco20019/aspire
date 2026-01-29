@@ -25,11 +25,12 @@ internal static class RuntimeIdentifierHelper
 
 /// <summary>
 /// Utilities for running processes using the layout's .NET runtime.
+/// Bundle tools are all native executables.
 /// </summary>
 internal static class LayoutProcessRunner
 {
     /// <summary>
-    /// Runs a tool (exe or dll) and captures output.
+    /// Runs a tool executable and captures output.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunAsync(
         LayoutConfiguration layout,
@@ -69,8 +70,7 @@ internal static class LayoutProcessRunner
     }
 
     /// <summary>
-    /// Creates a configured Process for running a tool.
-    /// Handles both native executables and managed DLLs.
+    /// Creates a configured Process for running a bundle tool executable.
     /// </summary>
     private static Process CreateProcess(
         LayoutConfiguration layout,
@@ -80,30 +80,16 @@ internal static class LayoutProcessRunner
         IDictionary<string, string>? environmentVariables,
         bool redirectOutput)
     {
-        var isExe = IsExecutable(toolPath);
         var process = new Process();
 
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
+        process.StartInfo.FileName = toolPath;
 
         if (redirectOutput)
         {
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
-        }
-
-        if (isExe)
-        {
-            // Native executable - run directly
-            process.StartInfo.FileName = toolPath;
-        }
-        else
-        {
-            // Managed DLL - use dotnet muxer
-            var muxerPath = layout.GetMuxerPath() 
-                ?? throw new InvalidOperationException("Bundle runtime not found. Cannot run managed tool.");
-            process.StartInfo.FileName = muxerPath;
-            process.StartInfo.ArgumentList.Add(toolPath);
         }
 
         // Set DOTNET_ROOT to use the layout's runtime
@@ -135,15 +121,5 @@ internal static class LayoutProcessRunner
         }
 
         return process;
-    }
-
-    /// <summary>
-    /// Determines if a path refers to a native executable (vs a DLL that needs dotnet to run).
-    /// </summary>
-    private static bool IsExecutable(string path)
-    {
-        return OperatingSystem.IsWindows()
-            ? path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-            : !path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
     }
 }
