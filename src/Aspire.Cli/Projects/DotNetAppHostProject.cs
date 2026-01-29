@@ -5,6 +5,7 @@ using Aspire.Cli.Backchannel;
 using Aspire.Cli.Certificates;
 using Aspire.Cli.Configuration;
 using Aspire.Cli.DotNet;
+using Aspire.Cli.Exceptions;
 using Aspire.Cli.Interaction;
 using Aspire.Cli.Layout;
 using Aspire.Cli.Resources;
@@ -380,6 +381,14 @@ internal sealed class DotNetAppHostProject : IAppHostProject
     /// <inheritdoc />
     public async Task<int> PublishAsync(PublishContext context, CancellationToken cancellationToken)
     {
+        // .NET projects require the SDK to be installed
+        if (!await SdkInstallHelper.EnsureSdkInstalledAsync(_sdkInstaller, _interactionService, _features, _telemetry, cancellationToken: cancellationToken))
+        {
+            // Throw an exception that will be caught by the command and result in SdkNotInstalled exit code
+            // This is cleaner than trying to signal through the backchannel pattern
+            throw new DotNetSdkNotInstalledException();
+        }
+
         var effectiveAppHostFile = context.AppHostFile;
         var isSingleFileAppHost = effectiveAppHostFile.Extension != ".csproj";
         var env = new Dictionary<string, string>(context.EnvironmentVariables);
