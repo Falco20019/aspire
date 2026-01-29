@@ -188,6 +188,8 @@ internal sealed class DotNetAppHostProject : IAppHostProject
         // .NET projects require the SDK to be installed
         if (!await SdkInstallHelper.EnsureSdkInstalledAsync(_sdkInstaller, _interactionService, _features, _telemetry, cancellationToken: cancellationToken))
         {
+            // Signal build failure so RunCommand doesn't wait forever
+            context.BuildCompletionSource?.TrySetResult(false);
             return ExitCodeConstants.SdkNotInstalled;
         }
 

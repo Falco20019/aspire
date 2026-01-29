@@ -167,17 +167,17 @@ public sealed class LayoutDiscovery : ILayoutDiscovery
 
     private LayoutConfiguration? TryInferLayout(string layoutPath)
     {
-        // Check for essential directories
-        var runtimePath = Path.Combine(layoutPath, "runtime");
-        var dashboardPath = Path.Combine(layoutPath, "dashboard");
-        var dcpPath = Path.Combine(layoutPath, "dcp");
-        var serverPath = Path.Combine(layoutPath, "aspire-server");
+        // Check for essential directories using BundleDiscovery constants
+        var runtimePath = Path.Combine(layoutPath, BundleDiscovery.RuntimeDirectoryName);
+        var dashboardPath = Path.Combine(layoutPath, BundleDiscovery.DashboardDirectoryName);
+        var dcpPath = Path.Combine(layoutPath, BundleDiscovery.DcpDirectoryName);
+        var serverPath = Path.Combine(layoutPath, BundleDiscovery.AppHostServerDirectoryName);
 
         _logger.LogDebug("TryInferLayout: Checking layout at {Path}", layoutPath);
-        _logger.LogDebug("  runtime/: {Exists}", Directory.Exists(runtimePath) ? "exists" : "MISSING");
-        _logger.LogDebug("  dashboard/: {Exists}", Directory.Exists(dashboardPath) ? "exists" : "MISSING");
-        _logger.LogDebug("  dcp/: {Exists}", Directory.Exists(dcpPath) ? "exists" : "MISSING");
-        _logger.LogDebug("  aspire-server/: {Exists}", Directory.Exists(serverPath) ? "exists" : "MISSING");
+        _logger.LogDebug("  {Dir}/: {Exists}", BundleDiscovery.RuntimeDirectoryName, Directory.Exists(runtimePath) ? "exists" : "MISSING");
+        _logger.LogDebug("  {Dir}/: {Exists}", BundleDiscovery.DashboardDirectoryName, Directory.Exists(dashboardPath) ? "exists" : "MISSING");
+        _logger.LogDebug("  {Dir}/: {Exists}", BundleDiscovery.DcpDirectoryName, Directory.Exists(dcpPath) ? "exists" : "MISSING");
+        _logger.LogDebug("  {Dir}/: {Exists}", BundleDiscovery.AppHostServerDirectoryName, Directory.Exists(serverPath) ? "exists" : "MISSING");
 
         if (!Directory.Exists(runtimePath) || !Directory.Exists(dashboardPath) || 
             !Directory.Exists(dcpPath) || !Directory.Exists(serverPath))
@@ -187,7 +187,7 @@ public sealed class LayoutDiscovery : ILayoutDiscovery
         }
 
         // Check for muxer
-        var muxerName = OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
+        var muxerName = BundleDiscovery.GetDotNetExecutableName();
         var muxerPath = Path.Combine(runtimePath, muxerName);
         _logger.LogDebug("  runtime/{Muxer}: {Exists}", muxerName, File.Exists(muxerPath) ? "exists" : "MISSING");
         
@@ -232,14 +232,7 @@ public sealed class LayoutDiscovery : ILayoutDiscovery
     {
         // Check that muxer exists (global dotnet in dev mode, bundled in production)
         var muxerPath = layout.GetMuxerPath();
-        if (muxerPath is null)
-        {
-            _logger.LogDebug("Layout validation failed: muxer not found");
-            return false;
-        }
-
-        // For non-path muxer (just "dotnet"), skip file existence check
-        if (muxerPath != "dotnet" && muxerPath != "dotnet.exe" && !File.Exists(muxerPath))
+        if (muxerPath is null || !File.Exists(muxerPath))
         {
             _logger.LogDebug("Layout validation failed: muxer not found at {Path}", muxerPath);
             return false;
