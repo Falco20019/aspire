@@ -294,8 +294,8 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
         if (dashboardPath is not null)
         {
             // Check for single-file exe first (bundle distribution), then fall back to DLL
-            var dashboardExe = Path.Combine(dashboardPath, "Aspire.Dashboard.exe");
-            var dashboardDll = Path.Combine(dashboardPath, "Aspire.Dashboard.dll");
+            var dashboardExe = Path.Combine(dashboardPath, "aspire-dashboard.exe");
+            var dashboardDll = Path.Combine(dashboardPath, "aspire-dashboard.dll");
             
             if (File.Exists(dashboardExe))
             {

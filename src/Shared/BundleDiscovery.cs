@@ -77,7 +77,7 @@ internal static class BundleDiscovery
     /// <summary>
     /// Directory name for AppHost Server in the bundle layout.
     /// </summary>
-    public const string AppHostServerDirectoryName = "apphost-server";
+    public const string AppHostServerDirectoryName = "aspire-server";
 
     /// <summary>
     /// Directory name for NuGet Helper tool in the bundle layout.

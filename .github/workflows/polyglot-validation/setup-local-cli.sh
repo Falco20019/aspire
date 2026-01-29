@@ -3,7 +3,7 @@
 # Used by polyglot validation Dockerfiles to use pre-built artifacts from the workflow
 #
 # This version uses the BUNDLE instead of CLI archive:
-# - Bundle includes: CLI, runtime, dashboard, dcp, apphost-server
+# - Bundle includes: CLI, runtime, dashboard, dcp, aspire-server
 # - No .NET SDK required (uses bundled runtime)
 
 set -e
@@ -64,7 +64,7 @@ fi
 
 echo "=== Checking required bundle structure ==="
 MISSING_DIRS=""
-for dir in runtime dashboard dcp apphost-server; do
+for dir in runtime dashboard dcp aspire-server; do
     if [ -d "$BUNDLE_DIR/$dir" ]; then
         echo "  ✓ $dir/ exists"
         echo "    Contents: $(ls "$BUNDLE_DIR/$dir" | head -5 | tr '\n' ' ')"

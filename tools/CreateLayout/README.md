@@ -87,7 +87,7 @@ The tool creates the following layout:
 │       └── Microsoft.AspNetCore.App/{version}/
 ├── dashboard/               # Aspire Dashboard files
 ├── dcp/                     # DCP binaries (5 Go executables)
-├── apphost-server/          # Pre-built AppHost server
+├── aspire-server/          # Pre-built AppHost server
 │   └── Aspire.Hosting.RemoteHost.dll
 └── tools/
     ├── aspire-nuget/        # NuGet helper tool

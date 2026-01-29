@@ -205,8 +205,8 @@ public sealed class LayoutConfiguration
         }
 
         // Check for single-file exe first (bundle distribution)
-        // On Windows: Aspire.Hosting.RemoteHost.exe, on Unix: Aspire.Hosting.RemoteHost (no extension)
-        var exeName = OperatingSystem.IsWindows() ? "Aspire.Hosting.RemoteHost.exe" : "Aspire.Hosting.RemoteHost";
+        // On Windows: aspire-server.exe, on Unix: aspire-server (no extension)
+        var exeName = OperatingSystem.IsWindows() ? "aspire-server.exe" : "aspire-server";
         var exePath = Path.Combine(serverPath, exeName);
         if (File.Exists(exePath))
         {
@@ -214,7 +214,7 @@ public sealed class LayoutConfiguration
         }
 
         // Fall back to DLL (dev mode or framework-dependent publish)
-        return Path.Combine(serverPath, "Aspire.Hosting.RemoteHost.dll");
+        return Path.Combine(serverPath, "aspire-server.dll");
     }
 
     /// <summary>
@@ -224,7 +224,7 @@ public sealed class LayoutConfiguration
     public string? GetAppHostServerDllPath()
     {
         var serverPath = GetComponentPath(LayoutComponent.AppHostServer);
-        return serverPath is not null ? Path.Combine(serverPath, "Aspire.Hosting.RemoteHost.dll") : null;
+        return serverPath is not null ? Path.Combine(serverPath, "aspire-server.dll") : null;
     }
 
     /// <summary>
@@ -290,7 +290,7 @@ public sealed class LayoutComponents
     /// <summary>
     /// Path to pre-built AppHost Server.
     /// </summary>
-    public string? ApphostServer { get; set; } = "apphost-server";
+    public string? ApphostServer { get; set; } = "aspire-server";
 
     /// <summary>
     /// Path to Aspire Dashboard. Null if resolved via NuGet.

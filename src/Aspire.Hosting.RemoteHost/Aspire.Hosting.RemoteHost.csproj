@@ -5,6 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>aspire-server</AssemblyName>
     <Description>Remote host server for polyglot Aspire AppHosts.</Description>
     <PackageTags>aspire hosting polyglot</PackageTags>
 

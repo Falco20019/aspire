@@ -171,13 +171,13 @@ public sealed class LayoutDiscovery : ILayoutDiscovery
         var runtimePath = Path.Combine(layoutPath, "runtime");
         var dashboardPath = Path.Combine(layoutPath, "dashboard");
         var dcpPath = Path.Combine(layoutPath, "dcp");
-        var serverPath = Path.Combine(layoutPath, "apphost-server");
+        var serverPath = Path.Combine(layoutPath, "aspire-server");
 
         _logger.LogDebug("TryInferLayout: Checking layout at {Path}", layoutPath);
         _logger.LogDebug("  runtime/: {Exists}", Directory.Exists(runtimePath) ? "exists" : "MISSING");
         _logger.LogDebug("  dashboard/: {Exists}", Directory.Exists(dashboardPath) ? "exists" : "MISSING");
         _logger.LogDebug("  dcp/: {Exists}", Directory.Exists(dcpPath) ? "exists" : "MISSING");
-        _logger.LogDebug("  apphost-server/: {Exists}", Directory.Exists(serverPath) ? "exists" : "MISSING");
+        _logger.LogDebug("  aspire-server/: {Exists}", Directory.Exists(serverPath) ? "exists" : "MISSING");
 
         if (!Directory.Exists(runtimePath) || !Directory.Exists(dashboardPath) || 
             !Directory.Exists(dcpPath) || !Directory.Exists(serverPath))

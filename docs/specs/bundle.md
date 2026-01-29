@@ -152,7 +152,7 @@ When a user runs `aspire run` with a TypeScript app host:
 ```text
 aspire-{version}-{platform}/
 │
-├── aspire[.exe]                        # Native AOT CLI (~15 MB)
+├── aspire[.exe]                        # Native AOT CLI (~25 MB)
 │
 ├── layout.json                         # Bundle metadata
 │
@@ -168,47 +168,33 @@ aspire-{version}-{platform}/
 │       └── Microsoft.AspNetCore.App/{version}/
 │           └── *.dll
 │
-├── apphost-server/                     # Pre-built AppHost Server (~10 MB, core only)
-│   ├── AppHostServer.dll               # Entry point
-│   ├── AppHostServer.deps.json
-│   ├── AppHostServer.runtimeconfig.json
-│   ├── appsettings.json                # Default config
-│   │
-│   │   # Core hosting assemblies only (no integrations)
-│   ├── Aspire.Hosting.dll
-│   ├── Aspire.Hosting.Abstractions.dll
-│   ├── Aspire.Hosting.RemoteHost.dll
-│   │
-│   │   # Dependencies
-│   ├── StreamJsonRpc.dll
-│   ├── Google.Protobuf.dll
-│   └── ...
+├── aspire-server/                     # Pre-built AppHost Server (~19 MB)
+│   ├── aspire-server[.exe]             # Single-file executable
+│   └── appsettings.json                # Default config
 │
-├── dashboard/                          # Aspire Dashboard (~15 MB, framework-dependent)
-│   ├── Aspire.Dashboard.dll
-│   ├── Aspire.Dashboard.deps.json
-│   ├── Aspire.Dashboard.runtimeconfig.json
+├── dashboard/                          # Aspire Dashboard (~42 MB)
+│   ├── aspire-dashboard[.exe]          # Single-file executable
 │   ├── wwwroot/
 │   └── ...
 │
-├── dcp/                                # Developer Control Plane (~50 MB)
-│   ├── dcp-host[.exe]                  # Native executable
-│   ├── dcpd[.exe]
+├── dcp/                                # Developer Control Plane (~127 MB)
+│   ├── dcp[.exe]                       # Native executable
 │   └── ...
 │
-└── tools/                              # Helper tools
-    ├── aspire-nuget/                   # NuGet operations (~5 MB)
-    │   ├── aspire-nuget.dll
-    │   ├── aspire-nuget.deps.json
-    │   ├── aspire-nuget.runtimeconfig.json
-    │   ├── NuGet.*.dll
+└── tools/                              # Helper tools (~5 MB)
+    ├── aspire-nuget/                   # NuGet operations
+    │   ├── aspire-nuget[.exe]          # Single-file executable
     │   └── ...
     │
-    └── dev-certs/                      # HTTPS certificate tool (~1 MB)
+    └── dev-certs/                      # HTTPS certificate tool
         ├── dotnet-dev-certs.dll
         ├── dotnet-dev-certs.deps.json
         └── dotnet-dev-certs.runtimeconfig.json
 ```
+
+**Total Bundle Size:**
+- **Unzipped:** ~323 MB
+- **Zipped:** ~113 MB
 
 ### layout.json Schema
 
@@ -220,7 +206,7 @@ aspire-{version}-{platform}/
   "components": {
     "cli": "aspire",
     "runtime": "runtime",
-    "apphostServer": "apphost-server",
+    "apphostServer": "aspire-server",
     "dashboard": "dashboard",
     "dcp": "dcp",
     "nugetHelper": "tools/aspire-nuget",
@@ -256,15 +242,15 @@ For .NET runtime resolution (used when launching Dashboard):
 |----------|-------------|---------|
 | `ASPIRE_LAYOUT_PATH` | Root of the bundle | `/opt/aspire` |
 | `ASPIRE_DCP_PATH` | DCP binaries location | `/opt/aspire/dcp` |
-| `ASPIRE_DASHBOARD_PATH` | Dashboard DLL path | `/opt/aspire/dashboard/Aspire.Dashboard.dll` |
+| `ASPIRE_DASHBOARD_PATH` | Dashboard executable path | `/opt/aspire/dashboard/aspire-dashboard` |
 | `ASPIRE_RUNTIME_PATH` | Bundled .NET runtime directory (guest apphosts only) | `/opt/aspire/runtime` |
-| `ASPIRE_INTEGRATION_LIBS_PATH` | Path to integration DLLs for AppHostServer assembly resolution | `/home/user/.aspire/libs` |
+| `ASPIRE_INTEGRATION_LIBS_PATH` | Path to integration DLLs for aspire-server assembly resolution | `/home/user/.aspire/libs` |
 | `ASPIRE_USE_GLOBAL_DOTNET` | Force SDK mode | `true` |
 | `ASPIRE_REPO_ROOT` | Dev mode (Aspire repo path, DEBUG builds only) | `/home/user/aspire` |
 
 **Note:** `ASPIRE_RUNTIME_PATH` is only set for guest (polyglot) apphosts. .NET apphosts use the globally installed `dotnet`.
 
-**Note:** `ASPIRE_INTEGRATION_LIBS_PATH` is set by the CLI when running guest apphosts that require additional hosting integration packages (e.g., `Aspire.Hosting.Redis`). The AppHostServer uses this path to resolve integration assemblies at runtime.
+**Note:** `ASPIRE_INTEGRATION_LIBS_PATH` is set by the CLI when running guest apphosts that require additional hosting integration packages (e.g., `Aspire.Hosting.Redis`). The aspire-server uses this path to resolve integration assemblies at runtime.
 
 ### Transition Compatibility
 
@@ -482,7 +468,7 @@ When a project references integrations (e.g., `Aspire.Hosting.Redis`):
 
 ```bash
 # CLI spawns the pre-built AppHost Server
-{runtime}/dotnet {apphost-server}/AppHostServer.dll \
+{aspire-server}/aspire-server \
   --project {user-project-path} \
   --socket {socket-path}
 ```
@@ -603,14 +589,14 @@ The bundle installs to a **separate subdirectory** from the existing CLI to allo
 │   ├── runtime/            #   - Bundled .NET runtime
 │   │   └── dotnet
 │   ├── dashboard/          #   - Pre-built Dashboard
-│   │   └── Aspire.Dashboard.dll
+│   │   └── aspire-dashboard
 │   ├── dcp/                #   - Developer Control Plane
 │   │   └── dcp
-│   ├── apphost-server/     #   - Pre-built AppHost Server (polyglot)
-│   │   └── AppHostServer.dll
+│   ├── aspire-server/     #   - Pre-built AppHost Server (polyglot)
+│   │   └── aspire-server
 │   └── tools/
 │       └── aspire-nuget/   #   - NuGet operations without SDK
-│           └── aspire-nuget.dll
+│           └── aspire-nuget
 │
 ├── hives/                  # NuGet package hives (shared, preserved)
 │   └── pr-{number}/
@@ -766,7 +752,7 @@ if (layout.IsDevLayout)
 
 To test bundle infrastructure during development without affecting the normal dev workflow:
 
-1. Build the AppHostServer standalone: `dotnet build src/Aspire.Cli.AppHostServer`
+1. Build the aspire-server standalone: `dotnet build src/Aspire.Hosting.RemoteHost`
 2. Create a test bundle layout manually with the built artifacts
 3. Set `ASPIRE_LAYOUT_PATH` to point to your test layout
 4. The dev layout detection only activates when `ASPIRE_REPO_ROOT` is set
@@ -1186,7 +1172,7 @@ This section tracks the implementation progress of the bundle feature.
   - Automatic bundle mode detection via `TryGetBundleLayout()`
   - `PrepareSdkModeAsync()` for traditional SDK-based server build
   - `PrepareBundleModeAsync()` for pre-built server from bundle
-- [x] **Standalone AppHostServer project** - `src/Aspire.Cli.AppHostServer/`
+- [x] **Standalone aspire-server project** - `src/Aspire.Hosting.RemoteHost/`
   - Pre-built server for bundle distribution
   - Framework-dependent deployment (uses bundled runtime)
 - [x] **Certificate management** - `src/Aspire.Cli/Certificates/`
@@ -1195,7 +1181,7 @@ This section tracks the implementation progress of the bundle feature.
   - `SdkCertificateToolRunner` - uses global `dotnet dev-certs`
 - [x] **Bundle build tooling** - `tools/CreateLayout/`
   - Downloads .NET SDK and extracts runtime + dev-certs
-  - Copies DCP, Dashboard, AppHostServer, NuGetHelper
+  - Copies DCP, Dashboard, aspire-server, NuGetHelper
   - Generates layout.json metadata
   - Enables RollForward=Major for all managed tools
 
@@ -1279,7 +1265,7 @@ The CreateLayout tool automatically patches all `*.runtimeconfig.json` files:
 1. **Download .NET SDK** for the target platform
 2. **Extract runtime components** (muxer, host, shared frameworks)
 3. **Extract dev-certs tool** from `sdk/*/DotnetTools/dotnet-dev-certs/`
-4. **Build and copy managed tools** (AppHostServer, Dashboard, NuGetHelper)
+4. **Build and copy managed tools** (aspire-server, aspire-dashboard, NuGetHelper)
 5. **Download and copy DCP** binaries
 6. **Patch runtimeconfig.json files** to enable RollForward=Major
 7. **Generate layout.json** with component metadata

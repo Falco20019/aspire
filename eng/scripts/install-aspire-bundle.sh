@@ -373,8 +373,8 @@ extract_bundle() {
     fi
     
     # Make AppHost Server executable
-    if [[ -f "${dest}/apphost-server/Aspire.Hosting.RemoteHost" ]]; then
-        chmod +x "${dest}/apphost-server/Aspire.Hosting.RemoteHost"
+    if [[ -f "${dest}/aspire-server/aspire-server" ]]; then
+        chmod +x "${dest}/aspire-server/aspire-server"
     fi
     
     # Make all tools executable

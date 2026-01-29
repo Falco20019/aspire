@@ -540,11 +540,11 @@ internal sealed class LayoutBuilder : IDisposable
             throw new InvalidOperationException("AppHost Server (Aspire.Hosting.RemoteHost) publish output not found.");
         }
 
-        var serverDir = Path.Combine(_outputPath, "apphost-server");
+        var serverDir = Path.Combine(_outputPath, "aspire-server");
         Directory.CreateDirectory(serverDir);
 
         CopyDirectory(serverPublishPath, serverDir);
-        Log($"  Copied AppHost Server to apphost-server");
+        Log($"  Copied AppHost Server to aspire-server");
 
         return Task.CompletedTask;
     }
