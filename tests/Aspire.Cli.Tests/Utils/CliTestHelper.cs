@@ -401,7 +401,8 @@ internal sealed class CliServiceCollectionTestOptions
     public Func<IServiceProvider, IFeatures> FeatureFlagsFactory { get; set; } = (IServiceProvider serviceProvider) =>
     {
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        return new Features(configuration);
+        var logger = serviceProvider.GetRequiredService<ILogger<Features>>();
+        return new Features(configuration, logger);
     };
 
     public Func<IServiceProvider, ITemplateProvider> TemplateProviderFactory { get; set; } = (IServiceProvider serviceProvider) =>
