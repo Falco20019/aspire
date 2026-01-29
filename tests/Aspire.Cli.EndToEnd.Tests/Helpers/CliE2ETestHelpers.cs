@@ -259,11 +259,8 @@ internal static class CliE2ETestHelpers
         this Hex1bTerminalInputSequenceBuilder builder,
         SequenceCounter counter)
     {
-        // Use -g (global) flag to ensure the setting persists across different working directories
-        // and is accessible by aspire add, aspire run, etc. even after aspire init creates a new
-        // .aspire/settings.json that would override local settings.
         return builder
-            .Type("aspire config set features.polyglotSupportEnabled true -g")
+            .Type("aspire config set features.polyglotSupportEnabled true")
             .Enter()
             .WaitForSuccessPrompt(counter);
     }
