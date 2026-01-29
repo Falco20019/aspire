@@ -20,7 +20,10 @@ internal sealed class ConfigurationService(IConfiguration configuration, CliExec
         if (File.Exists(settingsFilePath))
         {
             var existingContent = await File.ReadAllTextAsync(settingsFilePath, cancellationToken);
-            settings = JsonNode.Parse(existingContent)?.AsObject() ?? new JsonObject();
+            // Handle empty files or whitespace-only content
+            settings = string.IsNullOrWhiteSpace(existingContent)
+                ? new JsonObject()
+                : JsonNode.Parse(existingContent)?.AsObject() ?? new JsonObject();
         }
         else
         {
@@ -54,6 +57,13 @@ internal sealed class ConfigurationService(IConfiguration configuration, CliExec
         try
         {
             var existingContent = await File.ReadAllTextAsync(settingsFilePath, cancellationToken);
+
+            // Handle empty files or whitespace-only content
+            if (string.IsNullOrWhiteSpace(existingContent))
+            {
+                return false;
+            }
+
             var settings = JsonNode.Parse(existingContent)?.AsObject();
 
             if (settings is null)
@@ -143,6 +153,13 @@ internal sealed class ConfigurationService(IConfiguration configuration, CliExec
         try
         {
             var content = await File.ReadAllTextAsync(filePath, cancellationToken);
+
+            // Handle empty files or whitespace-only content
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return;
+            }
+
             var settings = JsonNode.Parse(content)?.AsObject();
 
             if (settings is not null)
