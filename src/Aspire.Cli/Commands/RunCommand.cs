@@ -11,7 +11,6 @@ using Aspire.Cli.Certificates;
 using Aspire.Cli.Configuration;
 using Aspire.Cli.DotNet;
 using Aspire.Cli.Interaction;
-using Aspire.Cli.Layout;
 using Aspire.Cli.Projects;
 using Aspire.Cli.Resources;
 using Aspire.Cli.Telemetry;
@@ -59,15 +58,12 @@ internal sealed class RunCommand : BaseCommand
     private readonly IProjectLocator _projectLocator;
     private readonly IAnsiConsole _ansiConsole;
     private readonly IConfiguration _configuration;
-    private readonly IDotNetSdkInstaller _sdkInstaller;
     private readonly IServiceProvider _serviceProvider;
     private readonly IFeatures _features;
-    private readonly ICliHostEnvironment _hostEnvironment;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<RunCommand> _logger;
     private readonly IAppHostProjectFactory _projectFactory;
     private readonly IAuxiliaryBackchannelMonitor _backchannelMonitor;
-    private readonly ILayoutDiscovery _layoutDiscovery;
 
     private static readonly Option<FileInfo?> s_projectOption = new("--project")
     {
@@ -95,16 +91,13 @@ internal sealed class RunCommand : BaseCommand
         IAnsiConsole ansiConsole,
         AspireCliTelemetry telemetry,
         IConfiguration configuration,
-        IDotNetSdkInstaller sdkInstaller,
         IFeatures features,
         ICliUpdateNotifier updateNotifier,
         IServiceProvider serviceProvider,
         CliExecutionContext executionContext,
-        ICliHostEnvironment hostEnvironment,
         ILogger<RunCommand> logger,
         IAppHostProjectFactory projectFactory,
         IAuxiliaryBackchannelMonitor backchannelMonitor,
-        ILayoutDiscovery layoutDiscovery,
         TimeProvider? timeProvider)
         : base("run", RunCommandStrings.Description, features, updateNotifier, executionContext, interactionService, telemetry)
     {
@@ -114,12 +107,9 @@ internal sealed class RunCommand : BaseCommand
         ArgumentNullException.ThrowIfNull(projectLocator);
         ArgumentNullException.ThrowIfNull(ansiConsole);
         ArgumentNullException.ThrowIfNull(configuration);
-        ArgumentNullException.ThrowIfNull(sdkInstaller);
-        ArgumentNullException.ThrowIfNull(hostEnvironment);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(projectFactory);
         ArgumentNullException.ThrowIfNull(backchannelMonitor);
-        ArgumentNullException.ThrowIfNull(layoutDiscovery);
 
         _runner = runner;
         _interactionService = interactionService;
@@ -128,13 +118,10 @@ internal sealed class RunCommand : BaseCommand
         _ansiConsole = ansiConsole;
         _configuration = configuration;
         _serviceProvider = serviceProvider;
-        _sdkInstaller = sdkInstaller;
         _features = features;
-        _hostEnvironment = hostEnvironment;
         _logger = logger;
         _projectFactory = projectFactory;
         _backchannelMonitor = backchannelMonitor;
-        _layoutDiscovery = layoutDiscovery;
         _timeProvider = timeProvider ?? TimeProvider.System;
 
         Options.Add(s_projectOption);
@@ -214,20 +201,6 @@ internal sealed class RunCommand : BaseCommand
             {
                 InteractionService.DisplayError("Unrecognized app host type.");
                 return ExitCodeConstants.FailedToFindProject;
-            }
-
-            // Check if SDK is required - skip for guest projects when running in bundle mode
-            var isGuestProject = project is GuestAppHostProject;
-            var layout = _layoutDiscovery.DiscoverLayout();
-            var isBundleMode = layout is not null;
-
-            // Guest projects in bundle mode don't require the .NET SDK
-            if (!isGuestProject || !isBundleMode)
-            {
-                if (!await SdkInstallHelper.EnsureSdkInstalledAsync(_sdkInstaller, InteractionService, _features, Telemetry, _hostEnvironment, cancellationToken))
-                {
-                    return ExitCodeConstants.SdkNotInstalled;
-                }
             }
 
             // Check for running instance if feature is enabled

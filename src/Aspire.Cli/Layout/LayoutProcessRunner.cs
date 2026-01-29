@@ -24,127 +24,14 @@ internal static class RuntimeIdentifierHelper
 }
 
 /// <summary>
-/// Helper to detect executable vs DLL paths cross-platform.
-/// </summary>
-internal static class ExecutableHelper
-{
-    /// <summary>
-    /// Determines if a path refers to an executable (vs a DLL that needs dotnet to run).
-    /// On Windows: checks for .exe extension.
-    /// On Unix: checks that it's not a .dll (extensionless files are executables).
-    /// </summary>
-    public static bool IsExecutable(string path)
-    {
-        return OperatingSystem.IsWindows()
-            ? path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-            : !path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
-    }
-}
-
-/// <summary>
 /// Utilities for running processes using the layout's .NET runtime.
 /// </summary>
 internal static class LayoutProcessRunner
 {
     /// <summary>
-    /// Checks if the muxer path is a bare command name (e.g., "dotnet") that the OS can resolve via PATH.
+    /// Runs a tool (exe or dll) and captures output.
     /// </summary>
-    private static bool IsBareCommandName(string path)
-    {
-        return path is "dotnet" or "dotnet.exe";
-    }
-
-    /// <summary>
-    /// Validates that the muxer path is usable - either exists as a file or is a bare command name.
-    /// </summary>
-    private static bool IsValidMuxerPath(string? muxerPath)
-    {
-        if (muxerPath is null)
-        {
-            return false;
-        }
-
-        // Bare command names like "dotnet" are valid - the OS will resolve them via PATH
-        if (IsBareCommandName(muxerPath))
-        {
-            return true;
-        }
-
-        // Full paths must exist
-        return File.Exists(muxerPath);
-    }
-
-    /// <summary>
-    /// Runs a managed DLL using the layout's .NET runtime.
-    /// </summary>
-    public static async Task<int> RunManagedAsync(
-        LayoutConfiguration layout,
-        string dllPath,
-        IEnumerable<string> arguments,
-        string? workingDirectory = null,
-        IDictionary<string, string>? environmentVariables = null,
-        CancellationToken ct = default)
-    {
-        var muxerPath = layout.GetMuxerPath();
-        if (!IsValidMuxerPath(muxerPath))
-        {
-            throw new InvalidOperationException("Layout muxer not found");
-        }
-
-        using var process = new Process();
-        process.StartInfo.FileName = muxerPath;
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = true;
-
-        // Set DOTNET_ROOT to use the layout's runtime
-        var runtimePath = layout.GetComponentPath(LayoutComponent.Runtime);
-        if (runtimePath is not null)
-        {
-            process.StartInfo.Environment["DOTNET_ROOT"] = runtimePath;
-            // Disable multi-level lookup to avoid using global .NET
-            process.StartInfo.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
-        }
-
-        // Add custom environment variables
-        if (environmentVariables is not null)
-        {
-            foreach (var (key, value) in environmentVariables)
-            {
-                process.StartInfo.Environment[key] = value;
-            }
-        }
-
-        if (workingDirectory is not null)
-        {
-            process.StartInfo.WorkingDirectory = workingDirectory;
-        }
-
-        // First argument is the DLL path
-        process.StartInfo.ArgumentList.Add(dllPath);
-
-        // Add remaining arguments
-        foreach (var arg in arguments)
-        {
-            process.StartInfo.ArgumentList.Add(arg);
-        }
-
-        process.Start();
-        await process.WaitForExitAsync(ct);
-
-        return process.ExitCode;
-    }
-
-    /// <summary>
-    /// Runs a managed DLL or native EXE and captures output.
-    /// </summary>
-    /// <param name="layout">The layout configuration.</param>
-    /// <param name="toolPath">Path to the tool (either .dll or .exe).</param>
-    /// <param name="arguments">Arguments to pass to the tool.</param>
-    /// <param name="workingDirectory">Optional working directory.</param>
-    /// <param name="environmentVariables">Optional environment variables.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A tuple containing exit code, stdout, and stderr.</returns>
-    public static async Task<(int ExitCode, string Output, string Error)> RunManagedWithOutputAsync(
+    public static async Task<(int ExitCode, string Output, string Error)> RunAsync(
         LayoutConfiguration layout,
         string toolPath,
         IEnumerable<string> arguments,
@@ -152,27 +39,69 @@ internal static class LayoutProcessRunner
         IDictionary<string, string>? environmentVariables = null,
         CancellationToken ct = default)
     {
-        var isExe = ExecutableHelper.IsExecutable(toolPath);
+        using var process = CreateProcess(layout, toolPath, arguments, workingDirectory, environmentVariables, redirectOutput: true);
+        
+        process.Start();
 
-        using var process = new Process();
+        var outputTask = process.StandardOutput.ReadToEndAsync(ct);
+        var errorTask = process.StandardError.ReadToEndAsync(ct);
+
+        await process.WaitForExitAsync(ct);
+
+        return (process.ExitCode, await outputTask, await errorTask);
+    }
+
+    /// <summary>
+    /// Starts a process without waiting for it to exit.
+    /// Returns the Process object for the caller to manage.
+    /// </summary>
+    public static Process Start(
+        LayoutConfiguration layout,
+        string toolPath,
+        IEnumerable<string> arguments,
+        string? workingDirectory = null,
+        IDictionary<string, string>? environmentVariables = null,
+        bool redirectOutput = false)
+    {
+        var process = CreateProcess(layout, toolPath, arguments, workingDirectory, environmentVariables, redirectOutput);
+        process.Start();
+        return process;
+    }
+
+    /// <summary>
+    /// Creates a configured Process for running a tool.
+    /// Handles both native executables and managed DLLs.
+    /// </summary>
+    private static Process CreateProcess(
+        LayoutConfiguration layout,
+        string toolPath,
+        IEnumerable<string> arguments,
+        string? workingDirectory,
+        IDictionary<string, string>? environmentVariables,
+        bool redirectOutput)
+    {
+        var isExe = IsExecutable(toolPath);
+        var process = new Process();
+
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.RedirectStandardError = true;
+
+        if (redirectOutput)
+        {
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+        }
 
         if (isExe)
         {
-            // For single-file exe (Windows .exe or Unix extensionless), run directly
+            // Native executable - run directly
             process.StartInfo.FileName = toolPath;
         }
         else
         {
-            // For DLL, use dotnet muxer
-            var muxerPath = layout.GetMuxerPath();
-            if (!IsValidMuxerPath(muxerPath))
-            {
-                throw new InvalidOperationException("Layout muxer not found");
-            }
+            // Managed DLL - use dotnet muxer
+            var muxerPath = layout.GetMuxerPath() 
+                ?? throw new InvalidOperationException("Bundle runtime not found. Cannot run managed tool.");
             process.StartInfo.FileName = muxerPath;
             process.StartInfo.ArgumentList.Add(toolPath);
         }
@@ -199,83 +128,22 @@ internal static class LayoutProcessRunner
             process.StartInfo.WorkingDirectory = workingDirectory;
         }
 
-        // Add remaining arguments
+        // Add arguments
         foreach (var arg in arguments)
         {
             process.StartInfo.ArgumentList.Add(arg);
         }
 
-        process.Start();
-
-        var outputTask = process.StandardOutput.ReadToEndAsync(ct);
-        var errorTask = process.StandardError.ReadToEndAsync(ct);
-
-        await process.WaitForExitAsync(ct);
-
-        return (process.ExitCode, await outputTask, await errorTask);
+        return process;
     }
 
     /// <summary>
-    /// Starts a managed process without waiting for it to exit.
-    /// Returns the Process object for the caller to manage.
+    /// Determines if a path refers to a native executable (vs a DLL that needs dotnet to run).
     /// </summary>
-    public static Process StartManaged(
-        LayoutConfiguration layout,
-        string dllPath,
-        IEnumerable<string> arguments,
-        string? workingDirectory = null,
-        IDictionary<string, string>? environmentVariables = null,
-        bool redirectOutput = false)
+    private static bool IsExecutable(string path)
     {
-        var muxerPath = layout.GetMuxerPath();
-        if (!IsValidMuxerPath(muxerPath))
-        {
-            throw new InvalidOperationException("Layout muxer not found");
-        }
-
-        var process = new Process();
-        process.StartInfo.FileName = muxerPath;
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.CreateNoWindow = true;
-
-        if (redirectOutput)
-        {
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-        }
-
-        // Set DOTNET_ROOT to use the layout's runtime
-        var runtimePath = layout.GetComponentPath(LayoutComponent.Runtime);
-        if (runtimePath is not null)
-        {
-            process.StartInfo.Environment["DOTNET_ROOT"] = runtimePath;
-            process.StartInfo.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
-        }
-
-        // Add custom environment variables
-        if (environmentVariables is not null)
-        {
-            foreach (var (key, value) in environmentVariables)
-            {
-                process.StartInfo.Environment[key] = value;
-            }
-        }
-
-        if (workingDirectory is not null)
-        {
-            process.StartInfo.WorkingDirectory = workingDirectory;
-        }
-
-        // First argument is the DLL path
-        process.StartInfo.ArgumentList.Add(dllPath);
-
-        // Add remaining arguments
-        foreach (var arg in arguments)
-        {
-            process.StartInfo.ArgumentList.Add(arg);
-        }
-
-        process.Start();
-        return process;
+        return OperatingSystem.IsWindows()
+            ? path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+            : !path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
     }
 }

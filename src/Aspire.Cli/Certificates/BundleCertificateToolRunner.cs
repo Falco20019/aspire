@@ -22,7 +22,7 @@ internal sealed class BundleCertificateToolRunner(
         CancellationToken cancellationToken)
     {
         var muxerPath = layout.GetMuxerPath();
-        var devCertsDll = layout.GetDevCertsDllPath();
+        var devCertsDll = layout.GetDevCertsPath();
 
         if (muxerPath is null)
         {
@@ -131,7 +131,7 @@ internal sealed class BundleCertificateToolRunner(
         CancellationToken cancellationToken)
     {
         var muxerPath = layout.GetMuxerPath();
-        var devCertsDll = layout.GetDevCertsDllPath();
+        var devCertsDll = layout.GetDevCertsPath();
 
         if (muxerPath is null)
         {
@@ -184,3 +184,4 @@ internal sealed class BundleCertificateToolRunner(
         return process.ExitCode;
     }
 }
+

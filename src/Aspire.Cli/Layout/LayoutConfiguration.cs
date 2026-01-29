@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Aspire.Shared;
+
 namespace Aspire.Cli.Layout;
 
 /// <summary>
@@ -109,8 +111,7 @@ public sealed class LayoutConfiguration
         var runtimePath = GetComponentPath(LayoutComponent.Runtime);
         if (runtimePath is not null)
         {
-            var muxerName = OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
-            var bundledPath = Path.Combine(runtimePath, muxerName);
+            var bundledPath = Path.Combine(runtimePath, BundleDiscovery.GetDotNetExecutableName());
             if (File.Exists(bundledPath))
             {
                 return bundledPath;
@@ -134,7 +135,7 @@ public sealed class LayoutConfiguration
     /// </summary>
     private static string? FindGlobalDotNet()
     {
-        var dotnetName = OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
+        var dotnetName = BundleDiscovery.GetDotNetExecutableName();
 
         // Check DOTNET_ROOT first
         var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
@@ -193,9 +194,9 @@ public sealed class LayoutConfiguration
     public string? GetDashboardPath() => GetComponentPath(LayoutComponent.Dashboard);
 
     /// <summary>
-    /// Gets the path to the AppHost Server executable or DLL.
+    /// Gets the path to the AppHost Server executable.
     /// </summary>
-    /// <returns>The path to Aspire.Hosting.RemoteHost executable if it exists, otherwise Aspire.Hosting.RemoteHost.dll.</returns>
+    /// <returns>The path to aspire-server executable.</returns>
     public string? GetAppHostServerPath()
     {
         var serverPath = GetComponentPath(LayoutComponent.AppHostServer);
@@ -204,33 +205,13 @@ public sealed class LayoutConfiguration
             return null;
         }
 
-        // Check for single-file exe first (bundle distribution)
-        // On Windows: aspire-server.exe, on Unix: aspire-server (no extension)
-        var exeName = OperatingSystem.IsWindows() ? "aspire-server.exe" : "aspire-server";
-        var exePath = Path.Combine(serverPath, exeName);
-        if (File.Exists(exePath))
-        {
-            return exePath;
-        }
-
-        // Fall back to DLL (dev mode or framework-dependent publish)
-        return Path.Combine(serverPath, "aspire-server.dll");
+        return Path.Combine(serverPath, BundleDiscovery.GetExecutableFileName(BundleDiscovery.AppHostServerExecutableName));
     }
 
     /// <summary>
-    /// Gets the path to the AppHost Server DLL.
+    /// Gets the path to the NuGet Helper executable.
     /// </summary>
-    [Obsolete("Use GetAppHostServerPath() instead which supports both exe and dll.")]
-    public string? GetAppHostServerDllPath()
-    {
-        var serverPath = GetComponentPath(LayoutComponent.AppHostServer);
-        return serverPath is not null ? Path.Combine(serverPath, "aspire-server.dll") : null;
-    }
-
-    /// <summary>
-    /// Gets the path to the NuGet Helper executable or DLL.
-    /// </summary>
-    /// <returns>The path to aspire-nuget executable if it exists, otherwise aspire-nuget.dll.</returns>
+    /// <returns>The path to aspire-nuget executable.</returns>
     public string? GetNuGetHelperPath()
     {
         var helperPath = GetComponentPath(LayoutComponent.NuGetHelper);
@@ -239,36 +220,16 @@ public sealed class LayoutConfiguration
             return null;
         }
 
-        // Check for single-file exe first (bundle distribution)
-        // On Windows: aspire-nuget.exe, on Unix: aspire-nuget (no extension)
-        var exeName = OperatingSystem.IsWindows() ? "aspire-nuget.exe" : "aspire-nuget";
-        var exePath = Path.Combine(helperPath, exeName);
-        if (File.Exists(exePath))
-        {
-            return exePath;
-        }
-
-        // Fall back to DLL (dev mode or framework-dependent publish)
-        return Path.Combine(helperPath, "aspire-nuget.dll");
+        return Path.Combine(helperPath, BundleDiscovery.GetExecutableFileName(BundleDiscovery.NuGetHelperExecutableName));
     }
 
     /// <summary>
-    /// Gets the path to the NuGet Helper DLL.
+    /// Gets the path to the dev-certs executable.
     /// </summary>
-    [Obsolete("Use GetNuGetHelperPath() instead which supports both exe and dll.")]
-    public string? GetNuGetHelperDllPath()
-    {
-        var helperPath = GetComponentPath(LayoutComponent.NuGetHelper);
-        return helperPath is not null ? Path.Combine(helperPath, "aspire-nuget.dll") : null;
-    }
-
-    /// <summary>
-    /// Gets the path to the dev-certs DLL.
-    /// </summary>
-    public string? GetDevCertsDllPath()
+    public string? GetDevCertsPath()
     {
         var devCertsPath = GetComponentPath(LayoutComponent.DevCerts);
-        return devCertsPath is not null ? Path.Combine(devCertsPath, "dotnet-dev-certs.dll") : null;
+        return devCertsPath is not null ? Path.Combine(devCertsPath, BundleDiscovery.GetExecutableFileName(BundleDiscovery.DevCertsExecutableName)) : null;
     }
 }
 
@@ -283,32 +244,32 @@ public sealed class LayoutComponents
     public string? Cli { get; set; } = "aspire";
 
     /// <summary>
-    /// Path to .NET runtime directory. Null in dev mode (uses global dotnet).
+    /// Path to .NET runtime directory.
     /// </summary>
-    public string? Runtime { get; set; } = "runtime";
+    public string? Runtime { get; set; } = BundleDiscovery.RuntimeDirectoryName;
 
     /// <summary>
     /// Path to pre-built AppHost Server.
     /// </summary>
-    public string? ApphostServer { get; set; } = "aspire-server";
+    public string? ApphostServer { get; set; } = BundleDiscovery.AppHostServerDirectoryName;
 
     /// <summary>
-    /// Path to Aspire Dashboard. Null if resolved via NuGet.
+    /// Path to Aspire Dashboard.
     /// </summary>
-    public string? Dashboard { get; set; } = "dashboard";
+    public string? Dashboard { get; set; } = BundleDiscovery.DashboardDirectoryName;
 
     /// <summary>
-    /// Path to Developer Control Plane. Null if resolved via NuGet.
+    /// Path to Developer Control Plane.
     /// </summary>
-    public string? Dcp { get; set; } = "dcp";
+    public string? Dcp { get; set; } = BundleDiscovery.DcpDirectoryName;
 
     /// <summary>
     /// Path to NuGet Helper tool.
     /// </summary>
-    public string? NugetHelper { get; set; } = "tools/aspire-nuget";
+    public string? NugetHelper { get; set; } = BundleDiscovery.NuGetHelperDirectoryName;
 
     /// <summary>
     /// Path to dev-certs tool.
     /// </summary>
-    public string? DevCerts { get; set; } = "tools/dev-certs";
+    public string? DevCerts { get; set; } = BundleDiscovery.DevCertsDirectoryName;
 }

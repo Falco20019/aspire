@@ -149,7 +149,7 @@ internal sealed class BundleNuGetPackageCache : INuGetPackageCache
 
         _logger.LogDebug("Running NuGet search via NuGetHelper: {Query}", query);
 
-        var (exitCode, output, error) = await LayoutProcessRunner.RunManagedWithOutputAsync(
+        var (exitCode, output, error) = await LayoutProcessRunner.RunAsync(
             layout,
             helperPath,
             args,
@@ -252,3 +252,4 @@ internal sealed partial class BundleSearchJsonContext : JsonSerializerContext
 }
 
 #endregion
+

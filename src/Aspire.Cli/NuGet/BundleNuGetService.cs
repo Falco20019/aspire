@@ -120,7 +120,7 @@ public sealed class BundleNuGetService : INuGetService
 
         _logger.LogDebug("Restoring {Count} packages", packageList.Count);
 
-        var (exitCode, _, error) = await LayoutProcessRunner.RunManagedWithOutputAsync(
+        var (exitCode, _, error) = await LayoutProcessRunner.RunAsync(
             layout,
             helperPath,
             restoreArgs,
@@ -141,7 +141,7 @@ public sealed class BundleNuGetService : INuGetService
             "--framework", targetFramework
         };
 
-        (exitCode, _, error) = await LayoutProcessRunner.RunManagedWithOutputAsync(
+        (exitCode, _, error) = await LayoutProcessRunner.RunAsync(
             layout,
             helperPath,
             layoutArgs,
@@ -173,3 +173,4 @@ public sealed class BundleNuGetService : INuGetService
         return Path.Combine(home, ".aspire", "packages");
     }
 }
+

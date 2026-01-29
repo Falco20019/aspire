@@ -84,6 +84,35 @@ internal static class BundleDiscovery
     /// </summary>
     public const string NuGetHelperDirectoryName = "tools/aspire-nuget";
 
+    /// <summary>
+    /// Directory name for dev-certs tool in the bundle layout.
+    /// </summary>
+    public const string DevCertsDirectoryName = "tools/dev-certs";
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // EXECUTABLE NAMES (without path, just the file name)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Executable name for the AppHost Server.
+    /// </summary>
+    public const string AppHostServerExecutableName = "aspire-server";
+
+    /// <summary>
+    /// Executable name for the Dashboard.
+    /// </summary>
+    public const string DashboardExecutableName = "aspire-dashboard";
+
+    /// <summary>
+    /// Executable name for the NuGet Helper tool.
+    /// </summary>
+    public const string NuGetHelperExecutableName = "aspire-nuget";
+
+    /// <summary>
+    /// Executable name for the dev-certs tool.
+    /// </summary>
+    public const string DevCertsExecutableName = "dotnet-dev-certs";
+
     // ═══════════════════════════════════════════════════════════════════════
     // DISCOVERY METHODS
     // ═══════════════════════════════════════════════════════════════════════
@@ -144,9 +173,9 @@ internal static class BundleDiscovery
         }
 
         var dashboardDir = Path.Combine(baseDirectory, DashboardDirectoryName);
-        var dashboardDll = Path.Combine(dashboardDir, "Aspire.Dashboard.dll");
+        var dashboardExe = Path.Combine(dashboardDir, GetExecutableFileName(DashboardExecutableName));
 
-        if (File.Exists(dashboardDll))
+        if (File.Exists(dashboardExe))
         {
             dashboardPath = dashboardDir;
             return true;
@@ -320,6 +349,26 @@ internal static class BundleDiscovery
     public static string GetDotNetExecutableName()
     {
         return OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
+    }
+
+    /// <summary>
+    /// Gets the platform-specific executable name with extension.
+    /// </summary>
+    /// <param name="baseName">The base executable name without extension (e.g., "aspire-server").</param>
+    /// <returns>The executable name with platform-appropriate extension.</returns>
+    public static string GetExecutableFileName(string baseName)
+    {
+        return OperatingSystem.IsWindows() ? $"{baseName}.exe" : baseName;
+    }
+
+    /// <summary>
+    /// Gets the platform-specific DLL name.
+    /// </summary>
+    /// <param name="baseName">The base name without extension (e.g., "aspire-server").</param>
+    /// <returns>The DLL name (e.g., "aspire-server.dll").</returns>
+    public static string GetDllFileName(string baseName)
+    {
+        return $"{baseName}.dll";
     }
 
     /// <summary>

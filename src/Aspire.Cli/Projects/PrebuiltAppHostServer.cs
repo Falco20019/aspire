@@ -80,12 +80,6 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
         return serverPath;
     }
 
-    /// <summary>
-    /// Gets the path to the pre-built AppHost server DLL.
-    /// </summary>
-    [Obsolete("Use GetServerPath() instead which supports both exe and dll.")]
-    public string GetServerDllPath() => GetServerPath();
-
     /// <inheritdoc />
     public async Task<AppHostServerPrepareResult> PrepareAsync(
         string sdkVersion,
@@ -198,7 +192,9 @@ internal sealed class PrebuiltAppHostServer : IAppHostServerProject
         bool debug = false)
     {
         var serverPath = GetServerPath();
-        var isExe = ExecutableHelper.IsExecutable(serverPath);
+        var isExe = OperatingSystem.IsWindows()
+            ? serverPath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+            : !serverPath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase);
 
         // Get runtime path early - needed for both exe and dll cases
         var runtimePath = _layout.GetDotNetExePath();

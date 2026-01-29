@@ -31,6 +31,7 @@ internal sealed class DotNetAppHostProject : IAppHostProject
     private readonly TimeProvider _timeProvider;
     private readonly IProjectUpdater _projectUpdater;
     private readonly ILayoutDiscovery _layoutDiscovery;
+    private readonly IDotNetSdkInstaller _sdkInstaller;
     private readonly RunningInstanceManager _runningInstanceManager;
 
     private static readonly string[] s_detectionPatterns = ["*.csproj", "*.fsproj", "*.vbproj", "apphost.cs"];
@@ -44,6 +45,7 @@ internal sealed class DotNetAppHostProject : IAppHostProject
         IFeatures features,
         IProjectUpdater projectUpdater,
         ILayoutDiscovery layoutDiscovery,
+        IDotNetSdkInstaller sdkInstaller,
         ILogger<DotNetAppHostProject> logger,
         TimeProvider? timeProvider = null)
     {
@@ -54,6 +56,7 @@ internal sealed class DotNetAppHostProject : IAppHostProject
         _features = features;
         _projectUpdater = projectUpdater;
         _layoutDiscovery = layoutDiscovery;
+        _sdkInstaller = sdkInstaller;
         _logger = logger;
         _timeProvider = timeProvider ?? TimeProvider.System;
         _runningInstanceManager = new RunningInstanceManager(_logger, _interactionService, _timeProvider);
@@ -182,6 +185,12 @@ internal sealed class DotNetAppHostProject : IAppHostProject
     /// <inheritdoc />
     public async Task<int> RunAsync(AppHostProjectContext context, CancellationToken cancellationToken)
     {
+        // .NET projects require the SDK to be installed
+        if (!await SdkInstallHelper.EnsureSdkInstalledAsync(_sdkInstaller, _interactionService, _features, _telemetry, cancellationToken: cancellationToken))
+        {
+            return ExitCodeConstants.SdkNotInstalled;
+        }
+
         var effectiveAppHostFile = context.AppHostFile;
         var isExtensionHost = ExtensionHelper.IsExtensionHost(_interactionService, out _, out var extensionBackchannel);
 

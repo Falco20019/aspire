@@ -177,7 +177,7 @@ public class Program
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
 
             // Use bundle runner if layout exists and has dev-certs tool
-            if (layout is not null && layout.GetDevCertsDllPath() is string devCertsPath && File.Exists(devCertsPath))
+            if (layout is not null && layout.GetDevCertsPath() is string devCertsPath && File.Exists(devCertsPath))
             {
                 return new BundleCertificateToolRunner(layout, loggerFactory.CreateLogger<BundleCertificateToolRunner>());
             }
@@ -611,3 +611,4 @@ internal class AspirePlaygroundEnricher : IProfileEnricher
         profile.Capabilities.Interactive = true;
     }
 }
+
