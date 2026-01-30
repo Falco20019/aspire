@@ -183,7 +183,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
             }
         };
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
-        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString()).DefaultTimeout();
+        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString());
 
         var vsCodeCliRunner = new FakeVsCodeCliRunner(null);
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
@@ -224,7 +224,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
             }
         };
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
-        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString()).DefaultTimeout();
+        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString());
 
         var vsCodeCliRunner = new FakeVsCodeCliRunner(null);
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);

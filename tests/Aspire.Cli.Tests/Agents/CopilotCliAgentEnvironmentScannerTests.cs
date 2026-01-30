@@ -105,7 +105,7 @@ public class CopilotCliAgentEnvironmentScannerTests(ITestOutputHelper outputHelp
             }
         };
         var mcpConfigPath = Path.Combine(copilotFolder.FullName, "mcp-config.json");
-        await File.WriteAllTextAsync(mcpConfigPath, existingConfig.ToJsonString()).DefaultTimeout();
+        await File.WriteAllTextAsync(mcpConfigPath, existingConfig.ToJsonString());
 
         var copilotCliRunner = new FakeCopilotCliRunner(new SemVersion(1, 0, 0));
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
@@ -149,7 +149,7 @@ public class CopilotCliAgentEnvironmentScannerTests(ITestOutputHelper outputHelp
             }
         };
         var mcpConfigPath = Path.Combine(copilotFolder.FullName, "mcp-config.json");
-        await File.WriteAllTextAsync(mcpConfigPath, existingConfig.ToJsonString()).DefaultTimeout();
+        await File.WriteAllTextAsync(mcpConfigPath, existingConfig.ToJsonString());
         
         // Also create the skill file to prevent that applicator
         var skillFilePath = Path.Combine(workspace.WorkspaceRoot.FullName, ".github", "skills", "aspire", "SKILL.md");
