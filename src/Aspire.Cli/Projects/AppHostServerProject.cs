@@ -20,7 +20,7 @@ namespace Aspire.Cli.Projects;
 /// </summary>
 internal interface IAppHostServerProjectFactory
 {
-    AppHostServerProject Create(string appPath);
+    IAppHostServerProject Create(string appPath);
 }
 
 /// <summary>
@@ -30,9 +30,41 @@ internal sealed class AppHostServerProjectFactory(
     IDotNetCliRunner dotNetCliRunner,
     IPackagingService packagingService,
     IConfigurationService configurationService,
-    ILogger<AppHostServerProject> logger) : IAppHostServerProjectFactory
+    ILoggerFactory loggerFactory) : IAppHostServerProjectFactory
 {
-    public AppHostServerProject Create(string appPath) => new AppHostServerProject(appPath, dotNetCliRunner, packagingService, configurationService, logger);
+    public IAppHostServerProject Create(string appPath)
+    {
+        // Normalize the path (same as AppHostServerProject)
+        var normalizedPath = Path.GetFullPath(appPath);
+        normalizedPath = new Uri(normalizedPath).LocalPath;
+        normalizedPath = OperatingSystem.IsWindows() ? normalizedPath.ToLowerInvariant() : normalizedPath;
+
+        // Generate socket path based on app path hash (deterministic for same project)
+        var pathHash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(normalizedPath));
+        var socketName = Convert.ToHexString(pathHash)[..12].ToLowerInvariant() + ".sock";
+
+        string socketPath;
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows uses named pipes
+            socketPath = socketName;
+        }
+        else
+        {
+            // Unix uses domain sockets
+            var socketDir = Path.Combine(Path.GetTempPath(), ".aspire", "sockets");
+            Directory.CreateDirectory(socketDir);
+            socketPath = Path.Combine(socketDir, socketName);
+        }
+
+        return new DotNetSdkBasedAppHostServerProject(
+            appPath,
+            socketPath,
+            dotNetCliRunner,
+            packagingService,
+            configurationService,
+            loggerFactory.CreateLogger<DotNetSdkBasedAppHostServerProject>());
+    }
 }
 
 /// <summary>
