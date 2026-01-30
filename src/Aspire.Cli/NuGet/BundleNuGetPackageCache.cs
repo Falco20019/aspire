@@ -147,7 +147,7 @@ internal sealed class BundleNuGetPackageCache : INuGetPackageCache
             args.Add(nugetConfigFile.FullName);
         }
 
-        // Enable verbose output for debugging
+        // Enable verbose output for debugging - goes to stderr so won't mix with JSON on stdout
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             args.Add("--verbose");

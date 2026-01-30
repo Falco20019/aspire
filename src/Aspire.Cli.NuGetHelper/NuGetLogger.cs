@@ -26,14 +26,8 @@ internal sealed class NuGetLogger(bool verbose) : INuGetLogger
             _ => ""
         };
 
-        if (level >= NuGetLogLevel.Warning)
-        {
-            Console.Error.WriteLine($"{prefix}{data}");
-        }
-        else
-        {
-            Console.WriteLine(data);
-        }
+        // All log output goes to stderr to avoid mixing with JSON output on stdout
+        Console.Error.WriteLine($"{prefix}{data}");
     }
 
     public void Log(NuGetLogMessage message) => Log(message.Level, message.Message);
