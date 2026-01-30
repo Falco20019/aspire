@@ -203,7 +203,7 @@ internal abstract class DotNetBasedAppHostServerProject : IAppHostServerProject
 
         // Handle NuGet config and channel resolution
         string? channelName = null;
-        var nugetConfigPath = Path.Combine(_projectModelPath, "NuGet.config");
+        var nugetConfigPath = Path.Combine(_projectModelPath, "nuget.config");
 
         var userNugetConfig = FindNuGetConfig(_appPath);
         if (userNugetConfig is not null)
