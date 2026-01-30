@@ -64,9 +64,12 @@ internal sealed class AppHostProjectFactory : IAppHostProjectFactory
             
             if (!polyglotEnabled)
             {
-                _logger.LogDebug("Skipping non-C# apphost because polyglot support is disabled: {AppHostFile}", appHostFile.FullName);
+                _logger.LogWarning("Skipping {Language} apphost because polyglot support is disabled (features:polyglotSupportEnabled=false): {AppHostFile}", 
+                    language.DisplayName, appHostFile.FullName);
                 return null;
             }
+            
+            _logger.LogDebug("Polyglot apphost accepted: {Language} at {AppHostFile}", language.DisplayName, appHostFile.FullName);
         }
 
         return GetProject(language);
