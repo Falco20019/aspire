@@ -172,7 +172,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            await Task.Delay(1000, cancellationToken);
+            await Task.Delay(1000, cancellationToken).DefaultTimeout();
             // Simulate log entries being returned
             yield return new BackchannelLogEntry
             {
@@ -217,7 +217,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Just simulate the process running until the user cancels.
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
 
                 return 0;
             };
@@ -273,7 +273,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
                 return 0;
             };
 
@@ -342,7 +342,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Just simulate the process running until the user cancels.
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
 
                 return 0;
             };
@@ -399,7 +399,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
         File.WriteAllText(appHostProjectFile.FullName, "<Project></Project>");
 
         var options = new DotNetCliRunnerInvocationOptions();
-        await AppHostHelper.BuildAppHostAsync(testRunner, testInteractionService, appHostProjectFile, options, workspace.WorkspaceRoot, CancellationToken.None);
+        await AppHostHelper.BuildAppHostAsync(testRunner, testInteractionService, appHostProjectFile, options, workspace.WorkspaceRoot, CancellationToken.None).DefaultTimeout();
     }
 
     [Fact]
@@ -436,7 +436,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
                 return 0;
             };
             return runner;
@@ -506,7 +506,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
                 return 0;
             };
             return runner;
@@ -575,7 +575,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             runner.RunAsyncCallback = async (projectFile, watch, noBuild, args, env, backchannelCompletionSource, options, ct) => {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
                 return 0;
             };
             return runner;
@@ -638,7 +638,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct);
+                await Task.Delay(100, ct).DefaultTimeout();
                 return 0;
             };
 
@@ -668,7 +668,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromSeconds(2));
 
-        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token);
+        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token).DefaultTimeout();
 
         Assert.False(watchModeUsed, "Expected watch mode to be disabled for single file apps even when DefaultWatchEnabled feature flag is true");
     }
@@ -695,7 +695,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct);
+                await Task.Delay(100, ct).DefaultTimeout();
                 return 0;
             };
 
@@ -727,7 +727,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromSeconds(2));
 
-        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token);
+        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token).DefaultTimeout();
 
         Assert.True(watchModeUsed, "Expected watch mode to be enabled when defaultWatchEnabled feature flag is true");
     }
@@ -754,7 +754,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct);
+                await Task.Delay(100, ct).DefaultTimeout();
                 return 0;
             };
 
@@ -786,7 +786,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromSeconds(2));
 
-        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token);
+        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token).DefaultTimeout();
 
         Assert.False(watchModeUsed, "Expected watch mode to be disabled when defaultWatchEnabled feature flag is false");
     }
@@ -813,7 +813,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct);
+                await Task.Delay(100, ct).DefaultTimeout();
                 return 0;
             };
 
@@ -845,7 +845,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromSeconds(2));
 
-        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token);
+        var exitCode = await result.InvokeAsync(cancellationToken: cts.Token).DefaultTimeout();
 
         Assert.False(watchModeUsed, "Expected watch mode to be disabled by default when defaultWatchEnabled feature flag is not set");
     }
@@ -855,7 +855,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -904,7 +904,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -949,7 +949,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -998,7 +998,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -1042,7 +1042,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -1087,7 +1087,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -1132,7 +1132,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();

@@ -65,7 +65,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
                             RequestStopAsyncCalled = completed
                         };
                         backchannelCompletionSource?.SetResult(backchannel);
-                        await completed.Task;
+                        await completed.Task.DefaultTimeout();
                         return 0;
                     }
                 };
@@ -118,7 +118,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
                             RequestStopAsyncCalled = completed
                         };
                         backchannelCompletionSource?.SetResult(backchannel);
-                        await completed.Task;
+                        await completed.Task.DefaultTimeout();
                         return 0;
                     }
                 };
@@ -171,7 +171,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
                             RequestStopAsyncCalled = completed
                         };
                         backchannelCompletionSource?.SetResult(backchannel);
-                        await completed.Task;
+                        await completed.Task.DefaultTimeout();
                         return 0;
                     }
                 };
@@ -229,7 +229,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
                             RequestStopAsyncCalled = completed
                         };
                         backchannelCompletionSource?.SetResult(backchannel);
-                        await completed.Task;
+                        await completed.Task.DefaultTimeout();
                         return 0;
                     }
                 };

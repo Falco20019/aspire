@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.InternalTesting;
 using Aspire.Cli.Configuration;
 using Aspire.Cli.Tests.Utils;
 
@@ -217,7 +218,7 @@ public class GuestAppHostProjectTests(ITestOutputHelper outputHelper) : IDisposa
 
         // Assert
         var settingsPath = AspireJsonConfiguration.GetFilePath(_workspace.WorkspaceRoot.FullName);
-        var content = await File.ReadAllTextAsync(settingsPath);
+        var content = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
 
         await Verify(content, extension: "json")
             .UseFileName("AspireJsonConfiguration_SettingsJson");

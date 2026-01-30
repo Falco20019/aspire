@@ -586,7 +586,7 @@ public class PublishCommandPromptingIntegrationTests(ITestOutputHelper outputHel
         runner.RunAsyncCallback = async (projectFile, watch, noBuild, args, env, backchannelCompletionSource, options, cancellationToken) =>
         {
             backchannelCompletionSource?.SetResult(promptBackchannel);
-            await promptBackchannel.WaitForCompletion();
+            await promptBackchannel.WaitForCompletion().DefaultTimeout();
             return 0;
         };
 
@@ -821,7 +821,7 @@ internal sealed class TestPromptBackchannel : IAppHostCliBackchannel
                 }
             };
 
-            await completionSource.Task.WaitAsync(cancellationToken);
+            await completionSource.Task.WaitAsync(cancellationToken).DefaultTimeout();
         }
 
         _completionSource.SetResult();

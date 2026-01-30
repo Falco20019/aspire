@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.InternalTesting;
 using System.Xml.Linq;
 using System.Xml;
 using Aspire.Cli.Packaging;
@@ -21,7 +22,7 @@ public class NuGetConfigMergerTests
     private static async Task<FileInfo> WriteConfigAsync(DirectoryInfo dir, string content)
     {
         var path = Path.Combine(dir.FullName, "nuget.config");
-        await File.WriteAllTextAsync(path, content);
+        await File.WriteAllTextAsync(path, content).DefaultTimeout();
         return new FileInfo(path);
     }
 
@@ -60,14 +61,14 @@ public class NuGetConfigMergerTests
         };
 
     var channel = CreateChannel(mappings);
-    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var targetConfigPath = Path.Combine(root.FullName, "nuget.config");
         Assert.True(File.Exists(targetConfigPath));
 
     using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
-    var expected = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
-        var actual = await File.ReadAllTextAsync(targetConfigPath);
+    var expected = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
+        var actual = await File.ReadAllTextAsync(targetConfigPath).DefaultTimeout();
         Assert.Equal(NormalizeLineEndings(expected), NormalizeLineEndings(actual));
     }
 
@@ -84,7 +85,7 @@ public class NuGetConfigMergerTests
         };
 
     var channel = CreateChannel(mappings);
-    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var targetConfigPath = Path.Combine(root.FullName, "nuget.config");
         Assert.True(File.Exists(targetConfigPath));
@@ -128,7 +129,7 @@ public class NuGetConfigMergerTests
         };
 
     var channel = CreateChannel(mappings);
-    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var packageSources = xml.Root!.Element("packageSources")!;
@@ -167,7 +168,7 @@ public class NuGetConfigMergerTests
         };
 
     var channel = CreateChannel(mappings);
-    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var packageSources = xml.Root!.Element("packageSources")!;
@@ -207,7 +208,7 @@ public class NuGetConfigMergerTests
         };
 
     var channel = CreateChannel(mappings);
-    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+    await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var psm = xml.Root!.Element("packageSourceMapping");
@@ -317,7 +318,7 @@ public class NuGetConfigMergerTests
         };
 
         var channel = CreateChannel(mappings);
-        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var packageSources = xml.Root!.Element("packageSources")!;
@@ -367,7 +368,7 @@ public class NuGetConfigMergerTests
         };
 
         var channel = CreateChannel(mappings);
-        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var packageSources = xml.Root!.Element("packageSources")!;
@@ -436,7 +437,7 @@ public class NuGetConfigMergerTests
         };
 
         var channel = CreateChannel(mappings);
-        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var packageSources = xml.Root!.Element("packageSources")!;
@@ -502,7 +503,7 @@ public class NuGetConfigMergerTests
         };
 
         var channel = CreateChannel(mappings);
-        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         var xml = XDocument.Load(Path.Combine(root.FullName, "nuget.config"));
         var packageSources = xml.Root!.Element("packageSources")!;
@@ -627,7 +628,7 @@ public class NuGetConfigMergerTests
             </configuration>
             """;
         
-        await WriteConfigAsync(root, existingConfig);
+        await WriteConfigAsync(root, existingConfig).DefaultTimeout();
 
         var mappings = new[]
         {
@@ -678,8 +679,8 @@ public class NuGetConfigMergerTests
             </configuration>
             """;
         
-        await WriteConfigAsync(root, existingConfig);
-        var originalContent = await File.ReadAllTextAsync(Path.Combine(root.FullName, "nuget.config"));
+        await WriteConfigAsync(root, existingConfig).DefaultTimeout();
+        var originalContent = await File.ReadAllTextAsync(Path.Combine(root.FullName, "nuget.config")).DefaultTimeout();
 
         var mappings = new[]
         {
@@ -701,7 +702,7 @@ public class NuGetConfigMergerTests
 
         // Verify file content was NOT changed
         var targetConfigPath = Path.Combine(root.FullName, "nuget.config");
-        var currentContent = await File.ReadAllTextAsync(targetConfigPath);
+        var currentContent = await File.ReadAllTextAsync(targetConfigPath).DefaultTimeout();
         Assert.Equal(NormalizeLineEndings(originalContent), NormalizeLineEndings(currentContent));
     }
 
@@ -719,7 +720,7 @@ public class NuGetConfigMergerTests
         var channel = CreateChannel(mappings);
         
         // Call without callback - should work as before
-        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel);
+        await NuGetConfigMerger.CreateOrUpdateAsync(root, channel).DefaultTimeout();
 
         // Verify file was created
         var targetConfigPath = Path.Combine(root.FullName, "nuget.config");

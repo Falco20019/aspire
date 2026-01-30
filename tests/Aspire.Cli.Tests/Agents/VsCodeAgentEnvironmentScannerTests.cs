@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.InternalTesting;
 using System.Text.Json.Nodes;
 using Aspire.Cli.Agents;
 using Aspire.Cli.Agents.VsCode;
@@ -22,7 +23,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
 
         // Scanner adds applicators for: Aspire MCP, Playwright MCP, and agent instructions
         Assert.NotEmpty(context.Applicators);
@@ -40,7 +41,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(childDir, workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
 
         // Scanner adds applicators for: Aspire MCP, Playwright MCP, and agent instructions
         Assert.NotEmpty(context.Applicators);
@@ -58,7 +59,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(childDir, workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
 
         Assert.Empty(context.Applicators);
     }
@@ -72,7 +73,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
 
         // Scanner adds applicators for: Aspire MCP, Playwright MCP, and agent instructions
         Assert.NotEmpty(context.Applicators);
@@ -90,7 +91,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
 
         // This test assumes no VSCODE_* environment variables are set
         // With no CLI available and no env vars, no applicator should be returned
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
 
         // The result depends on whether VSCODE_* environment variables exist
         // We just verify the test runs without throwing
@@ -109,14 +110,14 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var parentVsCode = workspace.CreateDirectory(".vscode");
         var context = CreateScanContext(workspace.WorkspaceRoot);
         
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
         
         // Scanner adds applicators for: Aspire MCP, Playwright MCP, and agent instructions
         Assert.NotEmpty(context.Applicators);
         var aspireApplicator = context.Applicators.First(a => a.Description.Contains("Aspire MCP"));
         
         // Apply the configuration
-        await aspireApplicator.ApplyAsync(CancellationToken.None);
+        await aspireApplicator.ApplyAsync(CancellationToken.None).DefaultTimeout();
         
         // Verify the mcp.json was created
         var mcpJsonPath = Path.Combine(parentVsCode.FullName, "mcp.json");
@@ -133,13 +134,13 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
-        await context.Applicators[0].ApplyAsync(CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
+        await context.Applicators[0].ApplyAsync(CancellationToken.None).DefaultTimeout();
 
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
         Assert.True(File.Exists(mcpJsonPath));
 
-        var content = await File.ReadAllTextAsync(mcpJsonPath);
+        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
         Assert.True(config.ContainsKey("servers"));
@@ -182,17 +183,17 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
             }
         };
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
-        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString());
+        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString()).DefaultTimeout();
 
         var vsCodeCliRunner = new FakeVsCodeCliRunner(null);
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
-        await context.Applicators[0].ApplyAsync(CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
+        await context.Applicators[0].ApplyAsync(CancellationToken.None).DefaultTimeout();
 
-        var content = await File.ReadAllTextAsync(mcpJsonPath);
+        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
 
@@ -223,22 +224,22 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
             }
         };
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
-        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString());
+        await File.WriteAllTextAsync(mcpJsonPath, existingConfig.ToJsonString()).DefaultTimeout();
 
         var vsCodeCliRunner = new FakeVsCodeCliRunner(null);
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
         
         // Should return applicators for Aspire MCP, Playwright MCP, and agent instructions
         Assert.NotEmpty(context.Applicators);
         var aspireApplicator = context.Applicators.First(a => a.Description.Contains("Aspire MCP"));
         
-        await aspireApplicator.ApplyAsync(CancellationToken.None);
+        await aspireApplicator.ApplyAsync(CancellationToken.None).DefaultTimeout();
 
-        var content = await File.ReadAllTextAsync(mcpJsonPath);
+        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
         var config = JsonNode.Parse(content)?.AsObject();
         var aspireServer = config?["servers"]?["aspire"]?.AsObject();
         
@@ -261,16 +262,16 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var scanner = new VsCodeAgentEnvironmentScanner(vsCodeCliRunner, executionContext, NullLogger<VsCodeAgentEnvironmentScanner>.Instance);
         var context = CreateScanContext(workspace.WorkspaceRoot);
 
-        await scanner.ScanAsync(context, CancellationToken.None);
+        await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
         
         // Apply both MCP-related applicators (Aspire and Playwright)
         var aspireApplicator = context.Applicators.First(a => a.Description.Contains("Aspire MCP"));
         var playwrightApplicator = context.Applicators.First(a => a.Description.Contains("Playwright MCP"));
-        await aspireApplicator.ApplyAsync(CancellationToken.None);
-        await playwrightApplicator.ApplyAsync(CancellationToken.None);
+        await aspireApplicator.ApplyAsync(CancellationToken.None).DefaultTimeout();
+        await playwrightApplicator.ApplyAsync(CancellationToken.None).DefaultTimeout();
 
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
-        var content = await File.ReadAllTextAsync(mcpJsonPath);
+        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
 

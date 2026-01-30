@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.InternalTesting;
 using Aspire.Cli.Agents;
 using Aspire.Cli.Tests.Utils;
 
@@ -90,12 +91,12 @@ public class CommonAgentApplicatorsTests(ITestOutputHelper outputHelper)
             workspace.WorkspaceRoot,
             TestSkillRelativePath,
             TestDescription);
-        await context.Applicators[0].ApplyAsync(CancellationToken.None);
+        await context.Applicators[0].ApplyAsync(CancellationToken.None).DefaultTimeout();
 
         // Assert
         var skillFilePath = Path.Combine(workspace.WorkspaceRoot.FullName, TestSkillRelativePath);
         Assert.True(File.Exists(skillFilePath));
-        var content = await File.ReadAllTextAsync(skillFilePath);
+        var content = await File.ReadAllTextAsync(skillFilePath).DefaultTimeout();
         Assert.Contains("# Aspire Skill", content);
         Assert.Contains("Running Aspire in agent environments", content);
     }

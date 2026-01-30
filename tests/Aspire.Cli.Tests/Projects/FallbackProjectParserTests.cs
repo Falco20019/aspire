@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.InternalTesting;
 using System.Text.Json;
 using Aspire.Cli.Projects;
 using Aspire.Cli.Tests.Utils;
@@ -29,7 +30,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -54,7 +55,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -79,7 +80,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -104,7 +105,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -130,7 +131,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -156,7 +157,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -193,7 +194,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
                     <PackageReference Include="Test" Version="1.0.0" />
             """;
 
-        await File.WriteAllTextAsync(projectFile, invalidProjectContent);
+        await File.WriteAllTextAsync(projectFile, invalidProjectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act & Assert
@@ -215,7 +216,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             builder.Build().Run();
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -245,7 +246,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             builder.Build().Run();
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -268,7 +269,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             builder.Build().Run();
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -292,7 +293,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             builder.Build().Run();
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -315,7 +316,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             builder.Build().Run();
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -337,7 +338,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
             builder.Build().Run();
             """;
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act
@@ -355,7 +356,7 @@ public class FallbackProjectParserTests(ITestOutputHelper output)
         var projectFile = Path.Combine(workspace.WorkspaceRoot.FullName, "Test.txt");
         var projectContent = "Some random content";
 
-        await File.WriteAllTextAsync(projectFile, projectContent);
+        await File.WriteAllTextAsync(projectFile, projectContent).DefaultTimeout();
         var parser = new FallbackProjectParser(NullLogger<FallbackProjectParser>.Instance);
 
         // Act & Assert

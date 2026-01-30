@@ -30,7 +30,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -69,7 +69,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -98,7 +98,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         // Add a configuration value that overrides the default
@@ -137,7 +137,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -174,7 +174,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -214,7 +214,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -291,7 +291,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
         {
@@ -330,7 +330,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
         {
@@ -371,7 +371,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
         {
@@ -417,7 +417,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var launchAppHostCalledTcs = new TaskCompletionSource();
         TestExtensionInteractionService? testExtensionInteractionService = null;
@@ -464,7 +464,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost");
+        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -516,7 +516,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -576,7 +576,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>");
+        await File.WriteAllTextAsync(projectFile.FullName, "<Project></Project>").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -640,16 +640,16 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
 
         // Create a fake solution file
         var solutionFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "Test.sln"));
-        await File.WriteAllTextAsync(solutionFile.FullName, "Not a real solution file.");
+        await File.WriteAllTextAsync(solutionFile.FullName, "Not a real solution file.").DefaultTimeout();
 
         // Create project files
         var project1Dir = workspace.WorkspaceRoot.CreateSubdirectory("Project1");
         var project1File = new FileInfo(Path.Combine(project1Dir.FullName, "Project1.csproj"));
-        await File.WriteAllTextAsync(project1File.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(project1File.FullName, "Not a real project file.").DefaultTimeout();
 
         var project2Dir = workspace.WorkspaceRoot.CreateSubdirectory("Project2");
         var project2File = new FileInfo(Path.Combine(project2Dir.FullName, "Project2.csproj"));
-        await File.WriteAllTextAsync(project2File.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(project2File.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -687,10 +687,10 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
         using var workspace = TemporaryWorkspace.Create(outputHelper);
 
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var referencedProject = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "Service.csproj"));
-        await File.WriteAllTextAsync(referencedProject.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(referencedProject.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -720,7 +720,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost");
+        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -765,7 +765,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost");
+        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -809,7 +809,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -853,7 +853,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost");
+        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -903,7 +903,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -951,7 +951,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -998,7 +998,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost");
+        await File.WriteAllTextAsync(appHostFile.FullName, "// Single-file AppHost").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();
@@ -1034,7 +1034,7 @@ public class DotNetCliRunnerTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
         var provider = services.BuildServiceProvider();

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.InternalTesting;
 using System.Xml;
 using Aspire.Cli.Packaging;
 
@@ -23,7 +24,7 @@ public class TemporaryNuGetConfigTests
         using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
 
         // Assert
-        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
+        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(configContent);
 
@@ -62,7 +63,7 @@ public class TemporaryNuGetConfigTests
         using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
 
         // Assert
-        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
+        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(configContent);
 
@@ -93,7 +94,7 @@ public class TemporaryNuGetConfigTests
         using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
 
         // Assert
-        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
+        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(configContent);
 
