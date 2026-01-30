@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
 using NuGetPackage = Aspire.Shared.NuGetPackageCli;
+using Microsoft.AspNetCore.InternalTesting;
 
 namespace Aspire.Cli.Tests.Utils;
 
@@ -65,9 +66,9 @@ public class CliUpdateNotificationServiceTests(ITestOutputHelper outputHelper)
         var provider = services.BuildServiceProvider();
         var notifier = provider.GetRequiredService<ICliUpdateNotifier>();
 
-        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).WaitAsync(CliTestConstants.DefaultTimeout);
+        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).DefaultTimeout();
         notifier.NotifyIfUpdateAvailable();
-        var suggestedVersion = await suggestedVersionTcs.Task.WaitAsync(CliTestConstants.DefaultTimeout);
+        var suggestedVersion = await suggestedVersionTcs.Task.DefaultTimeout();
 
         Assert.Equal("9.4.0-preview", suggestedVersion);
     }
@@ -120,9 +121,9 @@ public class CliUpdateNotificationServiceTests(ITestOutputHelper outputHelper)
         var provider = services.BuildServiceProvider();
         var notifier = provider.GetRequiredService<ICliUpdateNotifier>();
 
-        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).WaitAsync(CliTestConstants.DefaultTimeout);
+        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).DefaultTimeout();
         notifier.NotifyIfUpdateAvailable();
-        var suggestedVersion = await suggestedVersionTcs.Task.WaitAsync(CliTestConstants.DefaultTimeout);
+        var suggestedVersion = await suggestedVersionTcs.Task.DefaultTimeout();
 
         Assert.Equal("9.4.0", suggestedVersion);
     }
@@ -175,9 +176,9 @@ public class CliUpdateNotificationServiceTests(ITestOutputHelper outputHelper)
         var provider = services.BuildServiceProvider();
         var notifier = provider.GetRequiredService<ICliUpdateNotifier>();
 
-        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).WaitAsync(CliTestConstants.DefaultTimeout);
+        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).DefaultTimeout();
         notifier.NotifyIfUpdateAvailable();
-        var suggestedVersion = await suggestedVersionTcs.Task.WaitAsync(CliTestConstants.DefaultTimeout);
+        var suggestedVersion = await suggestedVersionTcs.Task.DefaultTimeout();
 
         Assert.Equal("9.5.0", suggestedVersion);
     }
@@ -226,7 +227,7 @@ public class CliUpdateNotificationServiceTests(ITestOutputHelper outputHelper)
         var provider = services.BuildServiceProvider();
         var notifier = provider.GetRequiredService<ICliUpdateNotifier>();
 
-        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).WaitAsync(CliTestConstants.DefaultTimeout);
+        await notifier.CheckForCliUpdatesAsync(workspace.WorkspaceRoot, CancellationToken.None).DefaultTimeout();
         notifier.NotifyIfUpdateAvailable();
     }
 

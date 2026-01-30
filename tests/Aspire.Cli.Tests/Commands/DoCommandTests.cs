@@ -6,6 +6,7 @@ using Aspire.Cli.Tests.Utils;
 using Aspire.Cli.Tests.TestServices;
 using Microsoft.Extensions.DependencyInjection;
 using Aspire.Cli.Utils;
+using Microsoft.AspNetCore.InternalTesting;
 
 namespace Aspire.Cli.Tests.Commands;
 
@@ -22,7 +23,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("do --help");
 
-        var exitCode = await result.InvokeAsync().WaitAsync(CliTestConstants.DefaultTimeout);
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
         Assert.Equal(0, exitCode);
     }
 
@@ -78,7 +79,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
 
         // Act
         var result = command.Parse("do my-custom-step");
-        var exitCode = await result.InvokeAsync().WaitAsync(CliTestConstants.DefaultTimeout);
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
 
         // Assert
         Assert.Equal(0, exitCode);
@@ -131,7 +132,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
 
         // Act
         var result = command.Parse("do deploy");
-        var exitCode = await result.InvokeAsync().WaitAsync(CliTestConstants.DefaultTimeout);
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
 
         // Assert
         Assert.Equal(0, exitCode);
@@ -184,7 +185,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
 
         // Act
         var result = command.Parse("do publish");
-        var exitCode = await result.InvokeAsync().WaitAsync(CliTestConstants.DefaultTimeout);
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
 
         // Assert
         Assert.Equal(0, exitCode);
@@ -242,7 +243,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
 
         // Act
         var result = command.Parse("do my-step --output-path test-output");
-        var exitCode = await result.InvokeAsync().WaitAsync(CliTestConstants.DefaultTimeout);
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
 
         // Assert
         Assert.Equal(0, exitCode);
@@ -274,7 +275,7 @@ public class DoCommandTests(ITestOutputHelper outputHelper)
 
         // Act
         var result = command.Parse("do my-step --project invalid.csproj");
-        var exitCode = await result.InvokeAsync().WaitAsync(CliTestConstants.DefaultTimeout);
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
 
         // Assert
         Assert.Equal(ExitCodeConstants.FailedToFindProject, exitCode);
