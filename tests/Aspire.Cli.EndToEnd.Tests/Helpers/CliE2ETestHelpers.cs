@@ -157,8 +157,10 @@ internal static class CliE2ETestHelpers
         // - ASPIRE_PLAYGROUND=true enables interactive mode
         // - TERM=xterm enables clear command and other terminal features
         // - .NET CLI vars suppress telemetry and first-time experience which can cause hangs
+        // - DOTNET_ROOT is inherited from CI environment for SDK fallback mode
+        // Note: We add $DOTNET_ROOT to PATH so dotnet commands work in SDK fallback mode
         return builder
-            .Type("export PATH=~/.aspire/bin:$PATH ASPIRE_PLAYGROUND=true TERM=xterm DOTNET_CLI_TELEMETRY_OPTOUT=true DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true DOTNET_GENERATE_ASPNET_CERTIFICATE=false")
+            .Type("export PATH=~/.aspire/bin:$DOTNET_ROOT:$PATH ASPIRE_PLAYGROUND=true TERM=xterm DOTNET_CLI_TELEMETRY_OPTOUT=true DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true DOTNET_GENERATE_ASPNET_CERTIFICATE=false")
             .Enter()
             .WaitForSuccessPrompt(counter);
     }
