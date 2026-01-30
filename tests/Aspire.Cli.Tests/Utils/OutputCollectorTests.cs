@@ -82,7 +82,7 @@ public class OutputCollectorTests
             for (int i = 0; i < 100; i++)
             {
                 _ = collector.GetLines().ToList();
-                await Task.Delay(1).DefaultTimeout();
+                await Task.Delay(1);
             }
         });
 
@@ -91,7 +91,7 @@ public class OutputCollectorTests
             for (int i = 0; i < 100; i++)
             {
                 collector.AppendOutput($"line {i}");
-                await Task.Delay(1).DefaultTimeout();
+                await Task.Delay(1);
             }
         });
 

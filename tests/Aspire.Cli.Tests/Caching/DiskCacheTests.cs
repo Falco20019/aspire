@@ -74,7 +74,7 @@ public class DiskCacheTests(ITestOutputHelper outputHelper)
 
         await cache.SetAsync(key, "OLD", CancellationToken.None).DefaultTimeout();
         // Slight delay to ensure different timestamp
-        await Task.Delay(50).DefaultTimeout();
+        await Task.Delay(50);
         await cache.SetAsync(key, "NEW", CancellationToken.None).DefaultTimeout();
 
         var val = await cache.GetAsync(key, CancellationToken.None).DefaultTimeout();

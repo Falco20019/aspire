@@ -172,7 +172,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            await Task.Delay(1000, cancellationToken).DefaultTimeout();
+            await Task.Delay(1000, cancellationToken);
             // Simulate log entries being returned
             yield return new BackchannelLogEntry
             {
@@ -217,7 +217,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Just simulate the process running until the user cancels.
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
 
                 return 0;
             };
@@ -273,7 +273,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
                 return 0;
             };
 
@@ -342,7 +342,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Just simulate the process running until the user cancels.
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
 
                 return 0;
             };
@@ -436,7 +436,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
                 return 0;
             };
             return runner;
@@ -506,7 +506,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
                 return 0;
             };
             return runner;
@@ -575,7 +575,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
             runner.RunAsyncCallback = async (projectFile, watch, noBuild, args, env, backchannelCompletionSource, options, ct) => {
                 var backchannel = sp.GetRequiredService<IAppHostCliBackchannel>();
                 backchannelCompletionSource!.SetResult(backchannel);
-                await Task.Delay(Timeout.InfiniteTimeSpan, ct).DefaultTimeout();
+                await Task.Delay(Timeout.InfiniteTimeSpan, ct);
                 return 0;
             };
             return runner;
@@ -638,7 +638,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct).DefaultTimeout();
+                await Task.Delay(100, ct);
                 return 0;
             };
 
@@ -695,7 +695,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct).DefaultTimeout();
+                await Task.Delay(100, ct);
                 return 0;
             };
 
@@ -754,7 +754,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct).DefaultTimeout();
+                await Task.Delay(100, ct);
                 return 0;
             };
 
@@ -813,7 +813,7 @@ public class RunCommandTests(ITestOutputHelper outputHelper)
                 backchannelCompletionSource!.SetResult(backchannel);
 
                 // Don't run indefinitely for the test
-                await Task.Delay(100, ct).DefaultTimeout();
+                await Task.Delay(100, ct);
                 return 0;
             };
 

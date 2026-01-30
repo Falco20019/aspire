@@ -138,7 +138,7 @@ public class PublishCommandTests(ITestOutputHelper outputHelper)
                 runner.RunAsyncCallback = async (projectFile, watch, noBuild, args, env, backchannelCompletionSource, options, cancellationToken) =>
                 {
                     // Simulate a delay to mimic apphost starting
-                    await Task.Delay(100, cancellationToken).DefaultTimeout();
+                    await Task.Delay(100, cancellationToken);
 
                     // Simulate apphost crash by completing the backchannel with an exception
                     backchannelCompletionSource?.SetException(new InvalidOperationException("AppHost process has exited unexpectedly. Use --debug to see more details."));
