@@ -251,6 +251,8 @@ internal static class CliE2ETestHelpers
     /// <summary>
     /// Enables polyglot support feature flag using the aspire config set command.
     /// This allows the CLI to create TypeScript and Python AppHosts.
+    /// Uses the global (-g) flag to ensure the setting persists across CLI invocations,
+    /// even when aspire init creates a new local settings.json file.
     /// </summary>
     /// <param name="builder">The sequence builder.</param>
     /// <param name="counter">The sequence counter for prompt detection.</param>
@@ -260,7 +262,7 @@ internal static class CliE2ETestHelpers
         SequenceCounter counter)
     {
         return builder
-            .Type("aspire config set features.polyglotSupportEnabled true")
+            .Type("aspire config set features.polyglotSupportEnabled true -g")
             .Enter()
             .WaitForSuccessPrompt(counter);
     }
