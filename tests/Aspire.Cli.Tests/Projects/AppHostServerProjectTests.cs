@@ -63,7 +63,7 @@ public class AppHostServerProjectTests(ITestOutputHelper outputHelper) : IDispos
         var (projectPath, _) = await project.CreateProjectFilesAsync("13.1.0", packages).DefaultTimeout();
 
         // Assert
-        var csprojContent = await File.ReadAllTextAsync(projectPath).DefaultTimeout();
+        var csprojContent = await File.ReadAllTextAsync(projectPath);
         var normalized = NormalizeCsprojForSnapshot(csprojContent, project);
 
         await Verify(normalized, extension: "xml")
@@ -88,7 +88,7 @@ public class AppHostServerProjectTests(ITestOutputHelper outputHelper) : IDispos
 
         // Assert
         var appSettingsPath = Path.Combine(project.ProjectModelPath, "appsettings.json");
-        var content = await File.ReadAllTextAsync(appSettingsPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(appSettingsPath);
 
         await Verify(content, extension: "json")
             .UseFileName("AppHostServerProject_AppSettingsJson");
@@ -109,7 +109,7 @@ public class AppHostServerProjectTests(ITestOutputHelper outputHelper) : IDispos
 
         // Assert
         var programCsPath = Path.Combine(project.ProjectModelPath, "Program.cs");
-        var content = await File.ReadAllTextAsync(programCsPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(programCsPath);
 
         // Use .txt extension to avoid compilation of snapshot file
         await Verify(content, extension: "txt")
@@ -259,7 +259,7 @@ public class AppHostServerProjectTests(ITestOutputHelper outputHelper) : IDispos
         var programCs = Path.Combine(project.ProjectModelPath, "Program.cs");
         Assert.True(File.Exists(programCs));
 
-        var content = await File.ReadAllTextAsync(programCs).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(programCs);
         Assert.Contains("RemoteHostServer.RunAsync", content);
     }
 
@@ -282,7 +282,7 @@ public class AppHostServerProjectTests(ITestOutputHelper outputHelper) : IDispos
         var appSettingsPath = Path.Combine(project.ProjectModelPath, "appsettings.json");
         Assert.True(File.Exists(appSettingsPath));
 
-        var content = await File.ReadAllTextAsync(appSettingsPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(appSettingsPath);
         Assert.Contains("AtsAssemblies", content);
         Assert.Contains("Aspire.Hosting", content);
         Assert.Contains("Aspire.Hosting.Redis", content);
@@ -571,7 +571,7 @@ public class AppHostServerProjectTests(ITestOutputHelper outputHelper) : IDispos
         // The nuget.config should exist
         Assert.True(File.Exists(nugetConfigPath), $"nuget.config should be created\n\nDiagnostics:\n{diagnosticInfo}");
         
-        var nugetConfigContent = await File.ReadAllTextAsync(nugetConfigPath).DefaultTimeout();
+        var nugetConfigContent = await File.ReadAllTextAsync(nugetConfigPath);
 
         // Normalize paths for snapshot (replace machine-specific paths)
         var normalizedContent = nugetConfigContent

@@ -24,7 +24,7 @@ public class TemporaryNuGetConfigTests
         using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
 
         // Assert
-        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
+        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(configContent);
 
@@ -63,7 +63,7 @@ public class TemporaryNuGetConfigTests
         using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
 
         // Assert
-        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
+        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(configContent);
 
@@ -94,7 +94,7 @@ public class TemporaryNuGetConfigTests
         using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
 
         // Assert
-        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
+        var configContent = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
         var xmlDoc = new XmlDocument();
         xmlDoc.LoadXml(configContent);
 

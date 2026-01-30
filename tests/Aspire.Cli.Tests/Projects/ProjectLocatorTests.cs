@@ -53,11 +53,11 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
 
         var targetAppHostDirectory = workspace.WorkspaceRoot.CreateSubdirectory("TargetAppHost");
         var targetAppHostProjectFile = new FileInfo(Path.Combine(targetAppHostDirectory.FullName, "TargetAppHost.csproj"));
-        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost").DefaultTimeout();
+        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost");
 
         var otherAppHostDirectory = workspace.WorkspaceRoot.CreateSubdirectory("OtherAppHost");
         var otherAppHostProjectFile = new FileInfo(Path.Combine(otherAppHostDirectory.FullName, "OtherAppHost.csproj"));
-        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost").DefaultTimeout();
+        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost");
 
         var workspaceSettingsDirectory = workspace.CreateDirectory(".aspire");
         var aspireSettingsFile = new FileInfo(Path.Combine(workspaceSettingsDirectory.FullName, "settings.json"));
@@ -87,11 +87,11 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
 
         var targetAppHostDirectory = dir2.CreateSubdirectory("TargetAppHost");
         var targetAppHostProjectFile = new FileInfo(Path.Combine(targetAppHostDirectory.FullName, "TargetAppHost.csproj"));
-        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost").DefaultTimeout();
+        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost");
 
         var otherAppHostDirectory = workspace.WorkspaceRoot.CreateSubdirectory("OtherAppHost");
         var otherAppHostProjectFile = new FileInfo(Path.Combine(otherAppHostDirectory.FullName, "OtherAppHost.csproj"));
-        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost").DefaultTimeout();
+        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost");
 
         var workspaceSettingsDirectory = workspace.CreateDirectory(".aspire");
         var aspireSettingsFile = new FileInfo(Path.Combine(workspaceSettingsDirectory.FullName, "settings.json"));
@@ -118,7 +118,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
 
         // Create a real apphost project file that can be discovered by scanning
         var realAppHostProjectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "RealAppHost.csproj"));
-        await File.WriteAllTextAsync(realAppHostProjectFile.FullName, "Not a real apphost project").DefaultTimeout();
+        await File.WriteAllTextAsync(realAppHostProjectFile.FullName, "Not a real apphost project");
 
         // Create settings file that points to a non-existent apphost file
         var workspaceSettingsDirectory = workspace.CreateDirectory(".aspire");
@@ -159,7 +159,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
 
         var targetAppHostDirectory = workspace.WorkspaceRoot.CreateSubdirectory("TargetAppHost");
         var targetAppHostProjectFile = new FileInfo(Path.Combine(targetAppHostDirectory.FullName, "TargetAppHost.csproj"));
-        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost").DefaultTimeout();
+        await File.WriteAllTextAsync(targetAppHostProjectFile.FullName, "Not a real apphost");
 
         var workspaceSettingsDirectory = workspace.CreateDirectory(".aspire");
         var aspireSettingsFile = new FileInfo(Path.Combine(workspaceSettingsDirectory.FullName, "settings.json"));
@@ -189,10 +189,10 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile1 = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost1.csproj"));
-        await File.WriteAllTextAsync(projectFile1.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile1.FullName, "Not a real project file.");
 
         var projectFile2 = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost2.csproj"));
-        await File.WriteAllTextAsync(projectFile2.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile2.FullName, "Not a real project file.");
 
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
         var projectLocator = CreateProjectLocator(executionContext);
@@ -207,10 +207,10 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var appHostProject = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(appHostProject.FullName, "Not a real apphost project.").DefaultTimeout();
+        await File.WriteAllTextAsync(appHostProject.FullName, "Not a real apphost project.");
 
         var webProject = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "WebProject.csproj"));
-        await File.WriteAllTextAsync(webProject.FullName, "Not a real web project.").DefaultTimeout();
+        await File.WriteAllTextAsync(webProject.FullName, "Not a real web project.");
 
         var projectFactory = new TestAppHostProjectFactory
         {
@@ -253,7 +253,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, $"AppHost{projectFileExtension}"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
 
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
         var projectLocator = CreateProjectLocator(executionContext);
@@ -268,7 +268,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var projectFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
 
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
         var projectLocator = CreateProjectLocator(executionContext);
@@ -285,7 +285,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
         var srcDirectory = workspace.CreateDirectory("src");
         var appHostDirectory = srcDirectory.CreateSubdirectory("AppHost");
         var appHostProjectFile = new FileInfo(Path.Combine(appHostDirectory.FullName, "AppHost.csproj"));
-        await File.WriteAllTextAsync(appHostProjectFile.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(appHostProjectFile.FullName, "Not a real project file.");
 
         var projectFactory = new TestAppHostProjectFactory
         {
@@ -307,7 +307,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
         var settingsFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, ".aspire", "settings.json"));
         Assert.True(settingsFile.Exists, "Settings file should exist.");
 
-        var settingsJson = await File.ReadAllTextAsync(settingsFile.FullName).DefaultTimeout();
+        var settingsJson = await File.ReadAllTextAsync(settingsFile.FullName);
         var settings = JsonSerializer.Deserialize<CliSettings>(settingsJson);
 
         Assert.NotNull(settings);
@@ -429,7 +429,7 @@ public class ProjectLocatorTests(ITestOutputHelper outputHelper)
 
         // Create an apphost.cs file without the required directive
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, @"using Aspire.Hosting.DefaultTimeout();
+        await File.WriteAllTextAsync(appHostFile.FullName, @"using Aspire.Hosting
 var builder = DistributedApplication.CreateBuilder(args);
 builder.Build().Run();");
 
@@ -514,7 +514,7 @@ builder.Build().Run();");
 
         // Create apphost.cs without directive
         var appHostFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "apphost.cs"));
-        await File.WriteAllTextAsync(appHostFile.FullName, @"using Aspire.Hosting.DefaultTimeout();
+        await File.WriteAllTextAsync(appHostFile.FullName, @"using Aspire.Hosting;
 var builder = DistributedApplication.CreateBuilder(args);
 builder.Build().Run();");
 
@@ -561,7 +561,7 @@ builder.Build().Run();");
         using var workspace = TemporaryWorkspace.Create(outputHelper);
 
         var txtFile = new FileInfo(Path.Combine(workspace.WorkspaceRoot.FullName, "readme.txt"));
-        await File.WriteAllTextAsync(txtFile.FullName, "Some text file").DefaultTimeout();
+        await File.WriteAllTextAsync(txtFile.FullName, "Some text file");
 
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);
         var projectLocator = CreateProjectLocator(executionContext);
@@ -695,7 +695,7 @@ builder.Build().Run();");
         // Create a subdirectory with a single project file
         var projectDirectory = workspace.WorkspaceRoot.CreateSubdirectory("MyAppHost");
         var projectFile = new FileInfo(Path.Combine(projectDirectory.FullName, "MyAppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
 
         var projectFactory = new TestAppHostProjectFactory
         {
@@ -749,9 +749,9 @@ builder.Build().Run();");
         // Create a subdirectory with multiple project files
         var projectDirectory = workspace.WorkspaceRoot.CreateSubdirectory("MultiProject");
         var projectFile1 = new FileInfo(Path.Combine(projectDirectory.FullName, "Project1.csproj"));
-        await File.WriteAllTextAsync(projectFile1.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile1.FullName, "Not a real project file.");
         var projectFile2 = new FileInfo(Path.Combine(projectDirectory.FullName, "Project2.csproj"));
-        await File.WriteAllTextAsync(projectFile2.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile2.FullName, "Not a real project file.");
 
         var projectFactory = new TestAppHostProjectFactory
         {
@@ -814,7 +814,7 @@ builder.Build().Run();");
         var topDirectory = workspace.WorkspaceRoot.CreateSubdirectory("playground");
         var subDirectory = topDirectory.CreateSubdirectory("mongo");
         var projectFile = new FileInfo(Path.Combine(subDirectory.FullName, "Mongo.AppHost.csproj"));
-        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.").DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile.FullName, "Not a real project file.");
 
         var projectFactory = new TestAppHostProjectFactory
         {

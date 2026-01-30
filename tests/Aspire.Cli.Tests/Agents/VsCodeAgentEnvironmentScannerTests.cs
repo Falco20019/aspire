@@ -140,7 +140,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
         Assert.True(File.Exists(mcpJsonPath));
 
-        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(mcpJsonPath);
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
         Assert.True(config.ContainsKey("servers"));
@@ -193,7 +193,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
         await context.Applicators[0].ApplyAsync(CancellationToken.None).DefaultTimeout();
 
-        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(mcpJsonPath);
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
 
@@ -239,7 +239,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         
         await aspireApplicator.ApplyAsync(CancellationToken.None).DefaultTimeout();
 
-        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(mcpJsonPath);
         var config = JsonNode.Parse(content)?.AsObject();
         var aspireServer = config?["servers"]?["aspire"]?.AsObject();
         
@@ -271,7 +271,7 @@ public class VsCodeAgentEnvironmentScannerTests(ITestOutputHelper outputHelper)
         await playwrightApplicator.ApplyAsync(CancellationToken.None).DefaultTimeout();
 
         var mcpJsonPath = Path.Combine(vsCodeFolder.FullName, "mcp.json");
-        var content = await File.ReadAllTextAsync(mcpJsonPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(mcpJsonPath);
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
 

@@ -54,7 +54,7 @@ public class CopilotCliAgentEnvironmentScannerTests(ITestOutputHelper outputHelp
         var mcpConfigPath = Path.Combine(copilotFolder.FullName, "mcp-config.json");
         Assert.True(File.Exists(mcpConfigPath));
 
-        var content = await File.ReadAllTextAsync(mcpConfigPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(mcpConfigPath);
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
         Assert.True(config.ContainsKey("mcpServers"));
@@ -115,7 +115,7 @@ public class CopilotCliAgentEnvironmentScannerTests(ITestOutputHelper outputHelp
         await scanner.ScanAsync(context, CancellationToken.None).DefaultTimeout();
         await context.Applicators[0].ApplyAsync(CancellationToken.None).DefaultTimeout();
 
-        var content = await File.ReadAllTextAsync(mcpConfigPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(mcpConfigPath);
         var config = JsonNode.Parse(content)?.AsObject();
         Assert.NotNull(config);
 
@@ -154,7 +154,7 @@ public class CopilotCliAgentEnvironmentScannerTests(ITestOutputHelper outputHelp
         // Also create the skill file to prevent that applicator
         var skillFilePath = Path.Combine(workspace.WorkspaceRoot.FullName, ".github", "skills", "aspire", "SKILL.md");
         Directory.CreateDirectory(Path.GetDirectoryName(skillFilePath)!);
-        await File.WriteAllTextAsync(skillFilePath, "# Aspire Skill").DefaultTimeout();
+        await File.WriteAllTextAsync(skillFilePath, "# Aspire Skill");
 
         var copilotCliRunner = new FakeCopilotCliRunner(new SemVersion(1, 0, 0));
         var executionContext = CreateExecutionContext(workspace.WorkspaceRoot);

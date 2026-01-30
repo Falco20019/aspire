@@ -22,7 +22,7 @@ public class NuGetConfigMergerTests
     private static async Task<FileInfo> WriteConfigAsync(DirectoryInfo dir, string content)
     {
         var path = Path.Combine(dir.FullName, "nuget.config");
-        await File.WriteAllTextAsync(path, content).DefaultTimeout();
+        await File.WriteAllTextAsync(path, content);
         return new FileInfo(path);
     }
 
@@ -67,8 +67,8 @@ public class NuGetConfigMergerTests
         Assert.True(File.Exists(targetConfigPath));
 
     using var tempConfig = await TemporaryNuGetConfig.CreateAsync(mappings);
-    var expected = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName).DefaultTimeout();
-        var actual = await File.ReadAllTextAsync(targetConfigPath).DefaultTimeout();
+    var expected = await File.ReadAllTextAsync(tempConfig.ConfigFile.FullName);
+        var actual = await File.ReadAllTextAsync(targetConfigPath);
         Assert.Equal(NormalizeLineEndings(expected), NormalizeLineEndings(actual));
     }
 
@@ -702,7 +702,7 @@ public class NuGetConfigMergerTests
 
         // Verify file content was NOT changed
         var targetConfigPath = Path.Combine(root.FullName, "nuget.config");
-        var currentContent = await File.ReadAllTextAsync(targetConfigPath).DefaultTimeout();
+        var currentContent = await File.ReadAllTextAsync(targetConfigPath);
         Assert.Equal(NormalizeLineEndings(originalContent), NormalizeLineEndings(currentContent));
     }
 

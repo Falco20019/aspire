@@ -674,7 +674,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify Directory.Packages.props was updated
-        var updatedContent = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName);
         Assert.Contains("Aspire.StackExchange.Redis.OutputCaching\" Version=\"9.5.0\"", updatedContent); // Redis package should be updated
         Assert.DoesNotContain("Aspire.StackExchange.Redis.OutputCaching\" Version=\"9.4.1\"", updatedContent); // Redis package should not contain old version
         // Microsoft.Extensions.ServiceDiscovery should remain unchanged since it's not referenced in any project file
@@ -779,7 +779,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify Directory.Packages.props was updated
-        var updatedContent = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName);
         Assert.Contains("Version=\"9.5.0\"", updatedContent);
     }
 
@@ -882,7 +882,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.False(updateResult.UpdatedApplied);
 
         // Verify Directory.Packages.props was not modified
-        var content = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName);
         Assert.DoesNotContain("Aspire.Hosting.Redis", content);
     }
 
@@ -1025,7 +1025,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify Directory.Packages.props was updated with new version
-        var content = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName);
         Assert.Contains("<PackageVersion Include=\"Aspire.Hosting.Redis\" Version=\"9.5.0\" />", content);
     }
 
@@ -1148,7 +1148,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify Directory.Packages.props was updated with new versions
-        var content = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName);
         Assert.Contains("<PackageVersion Include=\"Aspire.Hosting.Redis\" Version=\"9.5.0\" />", content);
         Assert.Contains("<PackageVersion Include=\"Aspire.StackExchange.Redis\" Version=\"9.5.0-preview.1\" />", content);
     }
@@ -1813,7 +1813,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify the SDK directive was updated from old to new version
-        var updatedContent = await File.ReadAllTextAsync(appHostFile.FullName).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(appHostFile.FullName);
         Assert.Contains("#:sdk Aspire.AppHost.Sdk@9.5.0", updatedContent);
         Assert.DoesNotContain("9.4.1", updatedContent);
     }
@@ -1896,7 +1896,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify the SDK directive was updated from wildcard to specific version
-        var updatedContent = await File.ReadAllTextAsync(appHostFile.FullName).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(appHostFile.FullName);
         Assert.Contains("#:sdk Aspire.AppHost.Sdk@9.5.0", updatedContent);
     }
 
@@ -2059,7 +2059,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify the SDK attribute was updated
-        var updatedContent = await File.ReadAllTextAsync(appHostProjectFile.FullName).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(appHostProjectFile.FullName);
         Assert.Contains("Aspire.AppHost.Sdk/9.5.0", updatedContent);
         Assert.DoesNotContain("9.4.1", updatedContent);
     }
@@ -2138,7 +2138,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.True(updateResult.UpdatedApplied);
 
         // Verify the project was migrated to the new SDK format
-        var updatedContent = await File.ReadAllTextAsync(appHostProjectFile.FullName).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(appHostProjectFile.FullName);
         await Verify(updatedContent, extension: "xml");
     }
 
@@ -2370,7 +2370,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         Assert.Equal(appHostProjectFile.FullName, packageUpdate.ProjectFile.FullName);
 
         // Verify Directory.Packages.props was NOT modified (should still be empty)
-        var directoryPackagesContent = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName).DefaultTimeout();
+        var directoryPackagesContent = await File.ReadAllTextAsync(directoryPackagesPropsFile.FullName);
         Assert.DoesNotContain("Aspire.Hosting.Redis", directoryPackagesContent);
     }
 
@@ -2390,7 +2390,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, originalContent).DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile, originalContent);
 
         var package = new NuGetPackageCli { Id = "Aspire.AppHost.Sdk", Version = "13.0.2", Source = "nuget.org" };
 
@@ -2398,7 +2398,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         await ProjectUpdater.UpdateSdkVersionInCsprojAppHostAsync(new FileInfo(projectFile), package).DefaultTimeout();
 
         // Assert
-        var updatedContent = await File.ReadAllTextAsync(projectFile).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(projectFile);
         await Verify(updatedContent, extension: "xml");
     }
 
@@ -2417,7 +2417,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, originalContent).DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile, originalContent);
 
         var package = new NuGetPackageCli { Id = "Aspire.AppHost.Sdk", Version = "13.0.2", Source = "nuget.org" };
 
@@ -2425,7 +2425,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         await ProjectUpdater.UpdateSdkVersionInCsprojAppHostAsync(new FileInfo(projectFile), package).DefaultTimeout();
 
         // Assert
-        var updatedContent = await File.ReadAllTextAsync(projectFile).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(projectFile);
         await Verify(updatedContent, extension: "xml");
     }
 
@@ -2449,7 +2449,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, originalContent).DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile, originalContent);
 
         var package = new NuGetPackageCli { Id = "Aspire.AppHost.Sdk", Version = "13.0.2", Source = "nuget.org" };
 
@@ -2457,7 +2457,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         await ProjectUpdater.UpdateSdkVersionInCsprojAppHostAsync(new FileInfo(projectFile), package).DefaultTimeout();
 
         // Assert
-        var updatedContent = await File.ReadAllTextAsync(projectFile).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(projectFile);
         await Verify(updatedContent, extension: "xml");
     }
 
@@ -2480,7 +2480,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, originalContent).DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile, originalContent);
 
         var package = new NuGetPackageCli { Id = "Aspire.AppHost.Sdk", Version = "13.0.2", Source = "nuget.org" };
 
@@ -2488,7 +2488,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         await ProjectUpdater.UpdateSdkVersionInCsprojAppHostAsync(new FileInfo(projectFile), package).DefaultTimeout();
 
         // Assert
-        var updatedContent = await File.ReadAllTextAsync(projectFile).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(projectFile);
         await Verify(updatedContent, extension: "xml");
     }
 
@@ -2507,7 +2507,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, originalContent).DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile, originalContent);
 
         var package = new NuGetPackageCli { Id = "Aspire.AppHost.Sdk", Version = "13.0.2", Source = "nuget.org" };
 
@@ -2515,7 +2515,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         await ProjectUpdater.UpdateSdkVersionInCsprojAppHostAsync(new FileInfo(projectFile), package).DefaultTimeout();
 
         // Assert
-        var updatedContent = await File.ReadAllTextAsync(projectFile).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(projectFile);
         await Verify(updatedContent, extension: "xml");
     }
 
@@ -2535,7 +2535,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        await File.WriteAllTextAsync(projectFile, originalContent).DefaultTimeout();
+        await File.WriteAllTextAsync(projectFile, originalContent);
 
         var package = new NuGetPackageCli { Id = "Aspire.AppHost.Sdk", Version = "13.0.2", Source = "nuget.org" };
 
@@ -2543,7 +2543,7 @@ public class ProjectUpdaterTests(ITestOutputHelper outputHelper)
         await ProjectUpdater.UpdateSdkVersionInCsprojAppHostAsync(new FileInfo(projectFile), package).DefaultTimeout();
 
         // Assert
-        var updatedContent = await File.ReadAllTextAsync(projectFile).DefaultTimeout();
+        var updatedContent = await File.ReadAllTextAsync(projectFile);
         await Verify(updatedContent, extension: "xml");
     }
 }

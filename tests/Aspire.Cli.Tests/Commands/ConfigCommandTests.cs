@@ -71,7 +71,7 @@ public class ConfigCommandTests(ITestOutputHelper outputHelper)
         var settingsPath = Path.Combine(workspace.WorkspaceRoot.FullName, ".aspire", "settings.json");
         Assert.True(File.Exists(settingsPath));
 
-        var json = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
+        var json = await File.ReadAllTextAsync(settingsPath);
         var settings = JsonNode.Parse(json)?.AsObject();
         Assert.NotNull(settings);
         Assert.Equal("bar", settings["foo"]?.ToString());
@@ -94,7 +94,7 @@ public class ConfigCommandTests(ITestOutputHelper outputHelper)
         var settingsPath = Path.Combine(workspace.WorkspaceRoot.FullName, ".aspire", "settings.json");
         Assert.True(File.Exists(settingsPath));
 
-        var json = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
+        var json = await File.ReadAllTextAsync(settingsPath);
         var settings = JsonNode.Parse(json)?.AsObject();
         Assert.NotNull(settings);
         Assert.True(settings["foo"] is JsonObject);
@@ -119,7 +119,7 @@ public class ConfigCommandTests(ITestOutputHelper outputHelper)
         var settingsPath = Path.Combine(workspace.WorkspaceRoot.FullName, ".aspire", "settings.json");
         Assert.True(File.Exists(settingsPath));
 
-        var json = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
+        var json = await File.ReadAllTextAsync(settingsPath);
         var settings = JsonNode.Parse(json)?.AsObject();
         Assert.NotNull(settings);
 
@@ -151,7 +151,7 @@ public class ConfigCommandTests(ITestOutputHelper outputHelper)
 
         // Verify the primitive was replaced with an object
         var settingsPath = Path.Combine(workspace.WorkspaceRoot.FullName, ".aspire", "settings.json");
-        var json = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
+        var json = await File.ReadAllTextAsync(settingsPath);
         var settings = JsonNode.Parse(json)?.AsObject();
         Assert.NotNull(settings);
 
@@ -271,7 +271,7 @@ public class ConfigCommandTests(ITestOutputHelper outputHelper)
 
         // Verify the entire deep.nested structure is cleaned up
         var settingsPath = Path.Combine(workspace.WorkspaceRoot.FullName, ".aspire", "settings.json");
-        var json = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
+        var json = await File.ReadAllTextAsync(settingsPath);
         var settings = JsonNode.Parse(json)?.AsObject();
         Assert.NotNull(settings);
 

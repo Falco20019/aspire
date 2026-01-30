@@ -45,7 +45,7 @@ public class NuGetConfigMergerSnapshotTests
     private static async Task<FileInfo> WriteConfigAsync(DirectoryInfo dir, string content)
     {
         var path = Path.Combine(dir.FullName, "nuget.config");
-        await File.WriteAllTextAsync(path, content).DefaultTimeout();
+        await File.WriteAllTextAsync(path, content);
         return new FileInfo(path);
     }
 

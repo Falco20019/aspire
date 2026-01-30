@@ -218,7 +218,7 @@ public class GuestAppHostProjectTests(ITestOutputHelper outputHelper) : IDisposa
 
         // Assert
         var settingsPath = AspireJsonConfiguration.GetFilePath(_workspace.WorkspaceRoot.FullName);
-        var content = await File.ReadAllTextAsync(settingsPath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(settingsPath);
 
         await Verify(content, extension: "json")
             .UseFileName("AspireJsonConfiguration_SettingsJson");

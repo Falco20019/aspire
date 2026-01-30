@@ -370,7 +370,7 @@ public class PackagingServiceTests(ITestOutputHelper outputHelper)
         var nugetConfigPath = Path.Combine(tempDir.FullName, "nuget.config");
         Assert.True(File.Exists(nugetConfigPath));
         
-        var configContent = await File.ReadAllTextAsync(nugetConfigPath).DefaultTimeout();
+        var configContent = await File.ReadAllTextAsync(nugetConfigPath);
         Assert.Contains("globalPackagesFolder", configContent);
         Assert.Contains(".nugetpackages", configContent);
 

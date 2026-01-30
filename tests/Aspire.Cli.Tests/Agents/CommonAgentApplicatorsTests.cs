@@ -96,7 +96,7 @@ public class CommonAgentApplicatorsTests(ITestOutputHelper outputHelper)
         // Assert
         var skillFilePath = Path.Combine(workspace.WorkspaceRoot.FullName, TestSkillRelativePath);
         Assert.True(File.Exists(skillFilePath));
-        var content = await File.ReadAllTextAsync(skillFilePath).DefaultTimeout();
+        var content = await File.ReadAllTextAsync(skillFilePath);
         Assert.Contains("# Aspire Skill", content);
         Assert.Contains("Running Aspire in agent environments", content);
     }
