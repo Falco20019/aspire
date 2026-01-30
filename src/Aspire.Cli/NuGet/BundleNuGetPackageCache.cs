@@ -147,7 +147,16 @@ internal sealed class BundleNuGetPackageCache : INuGetPackageCache
             args.Add(nugetConfigFile.FullName);
         }
 
+        // Enable verbose output for debugging
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            args.Add("--verbose");
+        }
+
         _logger.LogDebug("Running NuGet search via NuGetHelper: {Query}", query);
+        _logger.LogDebug("NuGetHelper path: {HelperPath}", helperPath);
+        _logger.LogDebug("NuGetHelper args: {Args}", string.Join(" ", args));
+        _logger.LogDebug("Working directory: {WorkingDir}", workingDirectory.FullName);
 
         var (exitCode, output, error) = await LayoutProcessRunner.RunAsync(
             layout,
@@ -156,14 +165,30 @@ internal sealed class BundleNuGetPackageCache : INuGetPackageCache
             workingDirectory: workingDirectory.FullName,
             ct: cancellationToken).ConfigureAwait(false);
 
+        // Log stderr output (verbose info from NuGetHelper)
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            _logger.LogDebug("NuGetHelper stderr: {Error}", error);
+        }
+
         if (exitCode != 0)
         {
-            _logger.LogError("NuGet search failed: {Error}", error);
+            _logger.LogError("NuGet search failed with exit code {ExitCode}", exitCode);
+            _logger.LogError("NuGet search stderr: {Error}", error);
+            _logger.LogError("NuGet search stdout: {Output}", output);
             throw new NuGetPackageCacheException($"Package search failed: {error}");
         }
 
+        _logger.LogDebug("NuGet search returned {Length} bytes", output?.Length ?? 0);
+
         try
         {
+            if (string.IsNullOrEmpty(output))
+            {
+                _logger.LogWarning("NuGet search returned empty output");
+                return [];
+            }
+
             var result = JsonSerializer.Deserialize(output, BundleSearchJsonContext.Default.BundleSearchResult);
             if (result?.Packages is null)
             {

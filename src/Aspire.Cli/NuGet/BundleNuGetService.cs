@@ -118,17 +118,33 @@ public sealed class BundleNuGetService : INuGetService
             restoreArgs.Add(workingDirectory);
         }
 
-        _logger.LogDebug("Restoring {Count} packages", packageList.Count);
+        // Enable verbose output for debugging
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            restoreArgs.Add("--verbose");
+        }
 
-        var (exitCode, _, error) = await LayoutProcessRunner.RunAsync(
+        _logger.LogDebug("Restoring {Count} packages", packageList.Count);
+        _logger.LogDebug("NuGetHelper path: {HelperPath}", helperPath);
+        _logger.LogDebug("NuGetHelper args: {Args}", string.Join(" ", restoreArgs));
+
+        var (exitCode, output, error) = await LayoutProcessRunner.RunAsync(
             layout,
             helperPath,
             restoreArgs,
             ct: ct);
 
+        // Log stderr output (verbose info from NuGetHelper)
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            _logger.LogDebug("NuGetHelper restore stderr: {Error}", error);
+        }
+
         if (exitCode != 0)
         {
-            _logger.LogError("Package restore failed: {Error}", error);
+            _logger.LogError("Package restore failed with exit code {ExitCode}", exitCode);
+            _logger.LogError("Package restore stderr: {Error}", error);
+            _logger.LogError("Package restore stdout: {Output}", output);
             throw new InvalidOperationException($"Package restore failed: {error}");
         }
 
@@ -141,15 +157,32 @@ public sealed class BundleNuGetService : INuGetService
             "--framework", targetFramework
         };
 
-        (exitCode, _, error) = await LayoutProcessRunner.RunAsync(
+        // Enable verbose output for debugging
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            layoutArgs.Add("--verbose");
+        }
+
+        _logger.LogDebug("Creating layout from {AssetsPath}", assetsPath);
+        _logger.LogDebug("Layout args: {Args}", string.Join(" ", layoutArgs));
+
+        (exitCode, output, error) = await LayoutProcessRunner.RunAsync(
             layout,
             helperPath,
             layoutArgs,
             ct: ct);
 
+        // Log stderr output (verbose info from NuGetHelper)
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            _logger.LogDebug("NuGetHelper layout stderr: {Error}", error);
+        }
+
         if (exitCode != 0)
         {
-            _logger.LogError("Layout creation failed: {Error}", error);
+            _logger.LogError("Layout creation failed with exit code {ExitCode}", exitCode);
+            _logger.LogError("Layout creation stderr: {Error}", error);
+            _logger.LogError("Layout creation stdout: {Output}", output);
             throw new InvalidOperationException($"Layout creation failed: {error}");
         }
 
