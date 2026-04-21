@@ -23,7 +23,7 @@ public class WithEndpointsTests
 
         var config = await EnvironmentVariableEvaluator.GetEnvironmentVariablesAsync(projectB.Resource, DistributedApplicationOperation.Run, TestServiceProvider.Instance).DefaultTimeout();
 
-        Assert.Equal("https://localhost:2000", config["services__project-a__mybinding__0"]);
+        Assert.Equal("https://localhost:2000", config["services__project-a__https__0"]);
         Assert.Equal("https://localhost:2000", config["PROJECT_A_MYBINDING"]);
         Assert.DoesNotContain("services__project_a__mybinding__0", config.Keys);
         Assert.DoesNotContain("PROJECT-A_MYBINDING", config.Keys);
@@ -43,9 +43,9 @@ public class WithEndpointsTests
 
         var config = await EnvironmentVariableEvaluator.GetEnvironmentVariablesAsync(projectB.Resource, DistributedApplicationOperation.Run, TestServiceProvider.Instance).DefaultTimeout();
 
-        Assert.Equal("https://localhost:2000", config["services__custom-name__mybinding__0"]);
+        Assert.Equal("https://localhost:2000", config["services__custom-name__https__0"]);
         Assert.Equal("https://localhost:2000", config["custom_name_MYBINDING"]);
-        Assert.DoesNotContain("services__custom_name__mybinding__0", config.Keys);
+        Assert.DoesNotContain("services__custom_name__https__0", config.Keys);
         Assert.DoesNotContain("custom-name_MYBINDING", config.Keys);
     }
 
@@ -76,28 +76,25 @@ public class WithEndpointsTests
         switch (flags)
         {
             case ReferenceEnvironmentInjectionFlags.All:
-                Assert.Equal("https://localhost:2000", config["services__custom__mybinding__0"]);
                 Assert.Equal("https://localhost:2000", config["custom_MYBINDING"]);
+                Assert.Equal("https://localhost:2000", config["services__custom__https__0"]);
                 break;
+
             case ReferenceEnvironmentInjectionFlags.ConnectionProperties:
-                Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
             case ReferenceEnvironmentInjectionFlags.ConnectionString:
-                Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
-            case ReferenceEnvironmentInjectionFlags.ServiceDiscovery:
-                Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.True(config.ContainsKey("services__custom__mybinding__0"));
-                break;
-            case ReferenceEnvironmentInjectionFlags.Endpoints:
-                Assert.True(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
             case ReferenceEnvironmentInjectionFlags.None:
                 Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
+                Assert.False(config.ContainsKey("services__custom__https__0"));
+                break;
+
+            case ReferenceEnvironmentInjectionFlags.ServiceDiscovery:
+                Assert.False(config.ContainsKey("custom_MYBINDING"));
+                Assert.True(config.ContainsKey("services__custom__https__0"));
+                break;
+
+            case ReferenceEnvironmentInjectionFlags.Endpoints:
+                Assert.True(config.ContainsKey("custom_MYBINDING"));
+                Assert.False(config.ContainsKey("services__custom__https__0"));
                 break;
         }
     }
@@ -129,28 +126,21 @@ public class WithEndpointsTests
         switch (flags)
         {
             case ReferenceEnvironmentInjectionFlags.All:
-                Assert.NotEqual("https://localhost:2000", config["services__custom__mybinding__0"]);
                 Assert.Equal("https://localhost:2000", config["custom_MYBINDING"]);
+                Assert.False(config.ContainsKey["services__custom__https__0"]);
                 break;
+
             case ReferenceEnvironmentInjectionFlags.ConnectionProperties:
-                Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
             case ReferenceEnvironmentInjectionFlags.ConnectionString:
-                Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
             case ReferenceEnvironmentInjectionFlags.ServiceDiscovery:
-                Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
-            case ReferenceEnvironmentInjectionFlags.Endpoints:
-                Assert.True(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
-                break;
             case ReferenceEnvironmentInjectionFlags.None:
                 Assert.False(config.ContainsKey("custom_MYBINDING"));
-                Assert.False(config.ContainsKey("services__custom__mybinding__0"));
+                Assert.False(config.ContainsKey["services__custom__https__0"]);
+                break;
+
+            case ReferenceEnvironmentInjectionFlags.Endpoints:
+                Assert.True(config.ContainsKey("custom_MYBINDING"));
+                Assert.False(config.ContainsKey["services__custom__https__0"]);
                 break;
         }
     }
