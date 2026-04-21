@@ -31,7 +31,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new --help");
@@ -71,7 +71,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         Assert.NotEmpty(command.Subcommands);
@@ -85,7 +85,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
     {
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper);
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         Assert.NotEmpty(command.Subcommands);
@@ -126,7 +126,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
@@ -183,7 +183,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
@@ -236,7 +236,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --name MyApp --output . --use-redis-cache --test-framework None");
@@ -291,7 +291,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --output notsrc --use-redis-cache --test-framework None");
@@ -369,7 +369,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --channel stable --use-redis-cache --test-framework None");
@@ -446,7 +446,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --channel stable --use-redis-cache --test-framework None");
@@ -457,6 +457,82 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
         Assert.Equal(0, exitCode);
         Assert.Equal("9.2.0", selectedVersion); // Should auto-select highest version (9.2.0)
         Assert.False(promptedForVersion); // Should not prompt when --channel is specified
+    }
+
+    [Fact]
+    public async Task NewCommandWithPrChannelPrefersCurrentCliVersion()
+    {
+        using var workspace = TemporaryWorkspace.Create(outputHelper);
+
+        var cliVersion = VersionHelper.GetDefaultSdkVersion();
+        string? selectedVersion = null;
+        bool promptedForVersion = false;
+
+        var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
+        {
+            options.NewCommandPrompterFactory = (sp) =>
+            {
+                var interactionService = sp.GetRequiredService<IInteractionService>();
+                var prompter = new TestNewCommandPrompter(interactionService);
+
+                prompter.PromptForTemplatesVersionCallback = (packages) =>
+                {
+                    promptedForVersion = true;
+                    throw new InvalidOperationException("Should not prompt for version when a PR channel contains the current CLI version.");
+                };
+
+                return prompter;
+            };
+
+            options.PackagingServiceFactory = (sp) =>
+            {
+                var packagingService = new NewCommandTestPackagingService();
+                packagingService.GetChannelsAsyncCallback = (ct) =>
+                {
+                    var fakeCache = new NewCommandTestFakeNuGetPackageCache();
+                    fakeCache.GetTemplatePackagesAsyncCallback = (dir, prerelease, nugetConfig, ct) =>
+                    {
+                        var packages = new[]
+                        {
+                            new NuGetPackage { Id = "Aspire.ProjectTemplates", Source = "pr-hive", Version = cliVersion },
+                            new NuGetPackage { Id = "Aspire.ProjectTemplates", Source = "pr-hive", Version = "99.0.0" },
+                        };
+
+                        return Task.FromResult<IEnumerable<NuGetPackage>>(packages);
+                    };
+
+                    var prChannel = PackageChannel.CreateExplicitChannel("pr-12345", PackageChannelQuality.Both, [], fakeCache);
+                    return Task.FromResult<IEnumerable<PackageChannel>>([prChannel]);
+                };
+
+                return packagingService;
+            };
+
+            options.DotNetCliRunnerFactory = (sp) =>
+            {
+                var runner = new TestDotNetCliRunner();
+                runner.InstallTemplateAsyncCallback = (packageName, version, nugetSource, force, invocationOptions, ct) =>
+                {
+                    selectedVersion = version;
+                    return (0, version);
+                };
+                runner.NewProjectAsyncCallback = (templateName, projectName, outputPath, invocationOptions, ct) =>
+                {
+                    return 0;
+                };
+                return runner;
+            };
+        });
+        using var provider = services.BuildServiceProvider();
+
+        var command = provider.GetRequiredService<NewCommand>();
+        var result = command.Parse("new aspire-starter --channel pr-12345 --use-redis-cache --test-framework None");
+
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
+
+        Assert.Equal(0, exitCode);
+        Assert.Equal(cliVersion, selectedVersion);
+        Assert.False(promptedForVersion);
     }
 
     [Fact]
@@ -504,7 +580,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --name MyApp --output . --use-redis-cache --test-framework None");
@@ -558,7 +634,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --name MyApp --output . --use-redis-cache --test-framework None --version 9.2.0");
@@ -589,7 +665,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             };
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new");
@@ -645,7 +721,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
@@ -698,7 +774,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
@@ -778,7 +854,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             };
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --name TestApp --output .");
@@ -856,7 +932,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
@@ -924,7 +1000,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             }
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new --name TestApp --output .");
 
@@ -944,10 +1020,10 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
         using var workspace = TemporaryWorkspace.Create(outputHelper);
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
         {
-            options.FeatureFlagsFactory = _ => new NewCommandTestFeatures(showAllTemplates: true);
+            options.FeatureFlagsFactory = _ => new TestFeatures().SetFeature(KnownFeatures.ShowAllTemplates, true);
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<NewCommand>();
 
         Assert.Contains(command.Subcommands, subcommand => subcommand.Name == "aspire-test");
@@ -998,7 +1074,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             };
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new --name TestApp --output .");
 
@@ -1053,7 +1129,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             }
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-java-empty --name TestApp --output . --localhost-tld false");
 
@@ -1088,7 +1164,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-empty --name TestApp --output . --localhost-tld false");
@@ -1151,7 +1227,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             };
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-empty --name TestApp --output .");
 
@@ -1202,7 +1278,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             }
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-ts-empty --name TestApp --output . --localhost-tld false");
 
@@ -1258,7 +1334,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             }
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<RootCommand>();
         // Do not pass --output so the default "./TestApp" path is used via the prompter
         var result = command.Parse("new aspire-ts-empty --name TestApp --localhost-tld false");
@@ -1355,7 +1431,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             }
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-ts-empty --name TestApp --output .");
 
@@ -1377,6 +1453,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
 
         var buildAndGenerateCalled = false;
         string? channelSeenByProject = null;
+        string? sdkVersionSeenByProject = null;
 
         var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
         {
@@ -1423,8 +1500,9 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
         services.AddSingleton<IAppHostProjectFactory>(new TestTypeScriptStarterProjectFactory((directory, cancellationToken) =>
         {
             buildAndGenerateCalled = true;
-            var config = AspireJsonConfiguration.Load(directory.FullName);
+            var config = AspireConfigFile.Load(directory.FullName);
             channelSeenByProject = config?.Channel;
+            sdkVersionSeenByProject = config?.SdkVersion;
 
             var modulesDir = Directory.CreateDirectory(Path.Combine(directory.FullName, ".modules"));
             File.WriteAllText(Path.Combine(modulesDir.FullName, "aspire.ts"), "// generated sdk");
@@ -1432,7 +1510,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             return Task.FromResult(true);
         }));
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-ts-starter --name TestApp --output . --channel daily --localhost-tld false");
 
@@ -1441,6 +1519,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
         Assert.Equal(0, exitCode);
         Assert.True(buildAndGenerateCalled);
         Assert.Equal("daily", channelSeenByProject);
+        Assert.Equal("9.2.0", sdkVersionSeenByProject);
         Assert.True(File.Exists(Path.Combine(workspace.WorkspaceRoot.FullName, ".modules", "aspire.ts")));
     }
 
@@ -1496,7 +1575,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
         services.AddSingleton<IInteractionService>(interactionService);
         services.AddSingleton<IAppHostProjectFactory>(new TestTypeScriptStarterProjectFactory((directory, cancellationToken) => Task.FromResult(false)));
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
         var command = provider.GetRequiredService<RootCommand>();
         var result = command.Parse("new aspire-ts-starter --name TestApp --output . --channel daily --localhost-tld false");
 
@@ -1541,7 +1620,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
                 return runner;
             };
         });
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-empty --name TestApp --output .");
@@ -1598,7 +1677,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             };
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
@@ -1654,7 +1733,7 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
             }
         });
 
-        var provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         var command = provider.GetRequiredService<NewCommand>();
         var result = command.Parse("new aspire-ts-empty --name TestApp --output .");
@@ -1663,6 +1742,285 @@ public class NewCommandTests(ITestOutputHelper outputHelper)
 
         Assert.NotEqual(0, exitCode);
         Assert.NotNull(testInteractionService);
+    }
+
+    [Fact]
+    public async Task NewCommandInExtensionModeAppendsProjectNameToOutputPath()
+    {
+        using var workspace = TemporaryWorkspace.Create(outputHelper);
+        string? capturedOutputPath = null;
+
+        var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
+        {
+            options.InteractionServiceFactory = sp => new TestExtensionInteractionService(sp);
+            options.ExtensionBackchannelFactory = _ => new TestExtensionBackchannel
+            {
+                HasCapabilityAsyncCallback = (c, _) => Task.FromResult(c is "baseline.v1"),
+            };
+
+            options.NewCommandPrompterFactory = (sp) =>
+            {
+                var interactionService = sp.GetRequiredService<IInteractionService>();
+                var prompter = new TestNewCommandPrompter(interactionService);
+
+                prompter.PromptForProjectNameCallback = (_) => "MyFirstApp";
+
+                // Simulate the user picking a parent folder (not named after the project)
+                prompter.PromptForOutputPathCallback = (_) =>
+                    Path.Combine(workspace.WorkspaceRoot.FullName, "source");
+
+                return prompter;
+            };
+
+            options.DotNetCliRunnerFactory = (sp) =>
+            {
+                var runner = new TestDotNetCliRunner();
+                runner.SearchPackagesAsyncCallback = (dir, query, prerelease, take, skip, nugetSource, useCache, options, cancellationToken) =>
+                {
+                    var package = new NuGetPackage()
+                    {
+                        Id = "Aspire.ProjectTemplates",
+                        Source = "nuget",
+                        Version = "9.2.0"
+                    };
+                    return (0, new NuGetPackage[] { package });
+                };
+                runner.InstallTemplateAsyncCallback = (packageName, version, nugetSource, force, invocationOptions, ct) =>
+                {
+                    return (0, version);
+                };
+                runner.NewProjectAsyncCallback = (templateName, projectName, outputPath, invocationOptions, ct) =>
+                {
+                    capturedOutputPath = outputPath;
+                    return 0;
+                };
+                return runner;
+            };
+        });
+        using var provider = services.BuildServiceProvider();
+
+        var command = provider.GetRequiredService<RootCommand>();
+        var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
+
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
+
+        Assert.Equal(0, exitCode);
+        Assert.NotNull(capturedOutputPath);
+
+        // Output path should have the project name appended as a subdirectory
+        var expectedPath = Path.Combine(workspace.WorkspaceRoot.FullName, "source", "MyFirstApp");
+        Assert.Equal(expectedPath, capturedOutputPath);
+    }
+
+    [Fact]
+    public async Task NewCommandInExtensionModeDoesNotDoubleAppendProjectName()
+    {
+        using var workspace = TemporaryWorkspace.Create(outputHelper);
+        string? capturedOutputPath = null;
+
+        var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
+        {
+            options.InteractionServiceFactory = sp => new TestExtensionInteractionService(sp);
+            options.ExtensionBackchannelFactory = _ => new TestExtensionBackchannel
+            {
+                HasCapabilityAsyncCallback = (c, _) => Task.FromResult(c is "baseline.v1"),
+            };
+
+            options.NewCommandPrompterFactory = (sp) =>
+            {
+                var interactionService = sp.GetRequiredService<IInteractionService>();
+                var prompter = new TestNewCommandPrompter(interactionService);
+
+                prompter.PromptForProjectNameCallback = (_) => "MyFirstApp";
+
+                // Simulate the user picking a folder already named after the project
+                prompter.PromptForOutputPathCallback = (_) =>
+                    Path.Combine(workspace.WorkspaceRoot.FullName, "source", "MyFirstApp");
+
+                return prompter;
+            };
+
+            options.DotNetCliRunnerFactory = (sp) =>
+            {
+                var runner = new TestDotNetCliRunner();
+                runner.SearchPackagesAsyncCallback = (dir, query, prerelease, take, skip, nugetSource, useCache, options, cancellationToken) =>
+                {
+                    var package = new NuGetPackage()
+                    {
+                        Id = "Aspire.ProjectTemplates",
+                        Source = "nuget",
+                        Version = "9.2.0"
+                    };
+                    return (0, new NuGetPackage[] { package });
+                };
+                runner.InstallTemplateAsyncCallback = (packageName, version, nugetSource, force, invocationOptions, ct) =>
+                {
+                    return (0, version);
+                };
+                runner.NewProjectAsyncCallback = (templateName, projectName, outputPath, invocationOptions, ct) =>
+                {
+                    capturedOutputPath = outputPath;
+                    return 0;
+                };
+                return runner;
+            };
+        });
+        using var provider = services.BuildServiceProvider();
+
+        var command = provider.GetRequiredService<RootCommand>();
+        var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
+
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
+
+        Assert.Equal(0, exitCode);
+        Assert.NotNull(capturedOutputPath);
+
+        // Output path should NOT have the project name double-appended
+        var expectedPath = Path.Combine(workspace.WorkspaceRoot.FullName, "source", "MyFirstApp");
+        Assert.Equal(expectedPath, capturedOutputPath);
+    }
+
+    [Fact]
+    public async Task NewCommandInConsoleModeDoesNotAppendProjectName()
+    {
+        using var workspace = TemporaryWorkspace.Create(outputHelper);
+        string? capturedOutputPath = null;
+
+        var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
+        {
+            // Default InteractionServiceFactory creates ConsoleInteractionService (not extension mode)
+
+            options.NewCommandPrompterFactory = (sp) =>
+            {
+                var interactionService = sp.GetRequiredService<IInteractionService>();
+                var prompter = new TestNewCommandPrompter(interactionService);
+
+                prompter.PromptForProjectNameCallback = (_) => "MyFirstApp";
+
+                // Simulate user accepting default path or selecting parent folder
+                prompter.PromptForOutputPathCallback = (_) =>
+                    Path.Combine(workspace.WorkspaceRoot.FullName, "source");
+
+                return prompter;
+            };
+
+            options.DotNetCliRunnerFactory = (sp) =>
+            {
+                var runner = new TestDotNetCliRunner();
+                runner.SearchPackagesAsyncCallback = (dir, query, prerelease, take, skip, nugetSource, useCache, options, cancellationToken) =>
+                {
+                    var package = new NuGetPackage()
+                    {
+                        Id = "Aspire.ProjectTemplates",
+                        Source = "nuget",
+                        Version = "9.2.0"
+                    };
+                    return (0, new NuGetPackage[] { package });
+                };
+                runner.InstallTemplateAsyncCallback = (packageName, version, nugetSource, force, invocationOptions, ct) =>
+                {
+                    return (0, version);
+                };
+                runner.NewProjectAsyncCallback = (templateName, projectName, outputPath, invocationOptions, ct) =>
+                {
+                    capturedOutputPath = outputPath;
+                    return 0;
+                };
+                return runner;
+            };
+        });
+        using var provider = services.BuildServiceProvider();
+
+        var command = provider.GetRequiredService<RootCommand>();
+        var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
+
+        var exitCode = await result.InvokeAsync().DefaultTimeout();
+
+        Assert.Equal(0, exitCode);
+        Assert.NotNull(capturedOutputPath);
+
+        // In console mode, the output path should NOT have project name appended
+        var expectedPath = Path.Combine(workspace.WorkspaceRoot.FullName, "source");
+        Assert.Equal(expectedPath, capturedOutputPath);
+    }
+
+    [Fact]
+    public async Task NewCommandInExtensionModeHandlesTrailingDirectorySeparator()
+    {
+        const string projectName = "MyFirstApp";
+
+        async Task AssertOutputPathAsync(Func<string, string> selectedPathFactory, Func<string, string> expectedPathFactory)
+        {
+            using var workspace = TemporaryWorkspace.Create(outputHelper);
+            string? capturedOutputPath = null;
+
+            var services = CliTestHelper.CreateServiceCollection(workspace, outputHelper, options =>
+            {
+                options.InteractionServiceFactory = sp => new TestExtensionInteractionService(sp);
+                options.ExtensionBackchannelFactory = _ => new TestExtensionBackchannel
+                {
+                    HasCapabilityAsyncCallback = (c, _) => Task.FromResult(c is "baseline.v1"),
+                };
+
+                options.NewCommandPrompterFactory = (sp) =>
+                {
+                    var interactionService = sp.GetRequiredService<IInteractionService>();
+                    var prompter = new TestNewCommandPrompter(interactionService);
+
+                    prompter.PromptForProjectNameCallback = (_) => projectName;
+
+                    prompter.PromptForOutputPathCallback = (_) =>
+                        selectedPathFactory(workspace.WorkspaceRoot.FullName);
+
+                    return prompter;
+                };
+
+                options.DotNetCliRunnerFactory = (sp) =>
+                {
+                    var runner = new TestDotNetCliRunner();
+                    runner.SearchPackagesAsyncCallback = (dir, query, prerelease, take, skip, nugetSource, useCache, options, cancellationToken) =>
+                    {
+                        var package = new NuGetPackage()
+                        {
+                            Id = "Aspire.ProjectTemplates",
+                            Source = "nuget",
+                            Version = "9.2.0"
+                        };
+                        return (0, new NuGetPackage[] { package });
+                    };
+                    runner.InstallTemplateAsyncCallback = (packageName, version, nugetSource, force, invocationOptions, ct) =>
+                    {
+                        return (0, version);
+                    };
+                    runner.NewProjectAsyncCallback = (templateName, pName, outputPath, invocationOptions, ct) =>
+                    {
+                        capturedOutputPath = outputPath;
+                        return 0;
+                    };
+                    return runner;
+                };
+            });
+            using var provider = services.BuildServiceProvider();
+
+            var command = provider.GetRequiredService<RootCommand>();
+            var result = command.Parse("new aspire-starter --use-redis-cache --test-framework None");
+
+            var exitCode = await result.InvokeAsync().DefaultTimeout();
+
+            Assert.Equal(0, exitCode);
+            Assert.NotNull(capturedOutputPath);
+            Assert.Equal(expectedPathFactory(workspace.WorkspaceRoot.FullName), capturedOutputPath);
+        }
+
+        // Trailing separator on a parent folder should still append the project name once.
+        await AssertOutputPathAsync(
+            workspaceRoot => Path.Combine(workspaceRoot, "source") + Path.DirectorySeparatorChar,
+            workspaceRoot => Path.Combine(workspaceRoot, "source", projectName));
+
+        // Trailing separator on a folder already named after the project should not double-append.
+        await AssertOutputPathAsync(
+            workspaceRoot => Path.Combine(workspaceRoot, projectName) + Path.DirectorySeparatorChar,
+            workspaceRoot => Path.Combine(workspaceRoot, projectName));
     }
 }
 
@@ -1776,7 +2134,7 @@ internal sealed class OrderTrackingInteractionService(List<string> operationOrde
     public void DisplayEmptyLine() { }
     public void DisplayPlainText(string text) { }
     public void DisplayRawText(string text, ConsoleOutput? consoleOverride = null) { }
-    public void DisplayMarkdown(string markdown) { }
+    public void DisplayMarkdown(string markdown, ConsoleOutput? consoleOverride = null) { }
     public void DisplayMarkupLine(string markup) { }
     public void WriteConsoleLog(string message, int? lineNumber = null, string? type = null, bool isErrorMessage = false) { }
     public void DisplayVersionUpdateNotification(string newerVersion, string? updateCommand = null) { }
@@ -1849,18 +2207,6 @@ internal sealed class TestScaffoldingService : IScaffoldingService
         }
 
         return Task.FromResult(true);
-    }
-}
-
-internal sealed class NewCommandTestFeatures(bool showAllTemplates = false) : IFeatures
-{
-    public bool IsFeatureEnabled(string featureFlag, bool defaultValue)
-    {
-        return featureFlag switch
-        {
-            "showAllTemplates" => showAllTemplates,
-            _ => defaultValue
-        };
     }
 }
 

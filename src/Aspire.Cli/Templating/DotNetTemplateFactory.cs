@@ -616,7 +616,28 @@ internal class DotNetTemplateFactory(
             outputPath = await prompter.PromptForOutputPath(pathDeriver(projectName), cancellationToken);
         }
 
-        return Path.GetFullPath(outputPath);
+        outputPath = Path.GetFullPath(outputPath);
+
+        // When running in extension mode (VS Code), the folder picker returns the parent
+        // directory the user selected. Append the project name as a subdirectory so the
+        // project gets its own clean folder, matching the git-clone convention.
+        if (ExtensionHelper.IsExtensionHost(interactionService, out _, out _)
+            && !projectName.Equals(".", StringComparison.Ordinal)
+            && !projectName.Equals("..", StringComparison.Ordinal))
+        {
+            var normalizedOutputPath = Path.TrimEndingDirectorySeparator(outputPath);
+
+            if (!string.Equals(Path.GetFileName(normalizedOutputPath), projectName, StringComparison.OrdinalIgnoreCase))
+            {
+                outputPath = Path.Combine(normalizedOutputPath, projectName);
+            }
+            else
+            {
+                outputPath = normalizedOutputPath;
+            }
+        }
+
+        return outputPath;
     }
 
     private async Task<(NuGetPackage Package, PackageChannel Channel)> GetProjectTemplatesVersionAsync(TemplateInputs inputs, CancellationToken cancellationToken)
@@ -633,6 +654,7 @@ internal class DotNetTemplateFactory(
         }
         
         IEnumerable<PackageChannel> channels;
+        var hasPrHives = executionContext.GetPrHiveCount() > 0;
         bool hasChannelSetting = !string.IsNullOrEmpty(channelName);
         
         if (hasChannelSetting)
@@ -650,8 +672,7 @@ internal class DotNetTemplateFactory(
         {
             // If there are hives (PR build directories), include all channels.
             // Otherwise, only use the implicit/default channel to avoid prompting.
-            var hasHives = executionContext.GetPrHiveCount() > 0;
-            channels = hasHives 
+            channels = hasPrHives
                 ? allChannels 
                 : allChannels.Where(c => c.Type is PackageChannelType.Implicit);
         }
@@ -689,7 +710,17 @@ internal class DotNetTemplateFactory(
             }
         }
 
-        // If channel was specified via --channel option or global setting (but no --version), 
+        if (VersionHelper.TryGetCurrentCliVersionMatch(
+            orderedPackagesFromChannels,
+            p => p.Package.Version,
+            out var cliVersionPackageFromChannel,
+            channelName: channelName,
+            hasPrHives: hasPrHives))
+        {
+            return cliVersionPackageFromChannel;
+        }
+
+        // If channel was specified via --channel option or global setting (but no --version),
         // automatically select the highest version from that channel without prompting
         if (hasChannelSetting)
         {
